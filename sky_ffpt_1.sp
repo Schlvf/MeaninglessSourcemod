@@ -191,6 +191,7 @@ public Action PlayerHurt_Action(Event event, const char[] name, bool dontBroadca
 		if (IsPlayerAlive(attackerUserId) && IsClientInGame(victimUserId))
 		{
 			//int tellClient = GetClientOfUserId(GetEventInt(event, "attacker"));
+			PrintToChatAll("Attacker Life: %d",GetClientHealth(attackerUserId));
 			PrintToChatAll("\x03 %N \x04damaged \x03 %N \x04for \x03 %d", attackerUserId, victimUserId, victimHurt);
 			if (GetConVarInt(FFProtection_Redirect) == 1) 
 			{
