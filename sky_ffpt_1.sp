@@ -74,30 +74,88 @@ public void OnPluginStart()
 {
 	CreateConVar("sky_ffpt_ver", PLUGIN_VERSION, "Sky_ffpt_Ver", FCVAR_SPONLY|FCVAR_REPLICATED|FCVAR_NOTIFY);
 
+	RegConsoleCmd("damage", damageAmount);
+	RegAdminCmd("forgiveall", forgiveAll, ADMFLAG_KICK);
+	RegAdminCmd("forgiveme", forgiveMe, ADMFLAG_KICK);
+
+	FFProtection_Enable = CreateConVar("l4d2_ffprotection_enable","1","Enable or Disable the plugin.");
+	FFProtection_Punish = CreateConVar("l4d2_ffprotection_punish","1","Punish the Attacking Teammate?");
+	FFProtection_Limit = CreateConVar("l4d2_ffprotection_fflimit","1","FF Damage Limit Enabled or Disabled. (Must be ON for Kick/Ban/Slay");
+	FFProtection_Kick = CreateConVar("l4d2_ffprotection_kick","0","Friendly-Fire Limit at which to Kick Offender. 0 Disables.");
+	FFProtection_Ban = CreateConVar("l4d2_ffprotection_ban","0","Friendly-Fire Limit at which to Ban Offender. 0 Disables. (Overrides Kick.)");
+	FFProtection_Warning = CreateConVar("l4d2_ffprotection_warn","1","Enable or Disable Warning Attacker.");
+	FFProtection_WarningType = CreateConVar("l4d2_ffprotection_warn_type","1","1 - Center Text (that small stuff) 2 - Hint Text 3 - Chat Text. (Defaults to 1 if invalid selection. Should not be same as display type due to conflict)");
+	FFProtection_WarnDisplay = CreateConVar("l4d2_ffprotection_warn_display","0","Enables or Disables showing player damage amount caused by their friendly-fire.");
+	FFProtection_WarnDisplayType = CreateConVar("l4d2_ffprotection_warn_display_type","1","1 - Center Text 2 - Hint Text 3 - Chat Text. (Defaults to 1 if invalid selection. Should not be same as warn type due to conflict)");
+	FFProtection_AttackerDisplay = CreateConVar("l4d2_ffprotection_attacker_display","0","Enables Display of person who is attacking teammates.");
+	FFProtection_AttackerDType = CreateConVar("l4d2_ffprotection_attacker_display_type","0","Attacker Display must be enabled. 1 (Center) 2 (Hint) 3 (Chat). If war, warn display, and attacker display enabled, encourage all 3 different values.)");
+	FFProtection_ShowVictim = CreateConVar("l4d2_ffprotection_show_victim","0","If Attacker Display Enabled, Enables or Disables showing the victim.");
+	FFProtection_ShowDetail = CreateConVar("l4d2_ffprotection_show_detail","0","If Enabled, shows full detail. Show victim, and attacker display must be enabled for this to work.");
+	FFProtection_Slay = CreateConVar("l4d2_ffprotection_slay","0","When set above 0, will kill attacker when they pass the Friendly-Fire Limit set here.");
+	FFProtection_Fire = CreateConVar("l4d2_ffprotection_fire","0","Enable or Disable Friendly-Fire through Molotov usage.");
+	FFProtection_Incap = CreateConVar("l4d2_ffprotection_slay","1","Allow Friendly-Fire to Incapacitate the attacker?");
+	FFProtection_TimeBan = CreateConVar("l4d2_ffprotection_timeban","15","If ban is enabled, the amount of time in minutes to ban the offender.");
+	FFProtection_KickMax = CreateConVar("l4d2_ffprotection_kickmax","1","If at least 1, will kick offender this many times prior to ban. If 0, will never kick.");
+	FFProtection_SlayAllowed = CreateConVar("l4d2_ffprotection_slay_enabled","1","Enable or Disable the plugin from slaying offenders.");
+	FFProtection_Redirect = CreateConVar("l4d2_ffprotection_attacker_redirect","1","Enable or Disable the redirection of Friendly Fire upon the attacker.");
+	FFProtection_Heal = CreateConVar("l4d2_ffprotection_victim_heal","1","Enable or Disable healing victim of damage received from Friendly-Fire.");
+	FFProtection_pAmount = CreateConVar("l4d2_ffprotection_punish_amount","1","Amount of damage offender receives. If 0, received is same as dealt.");
+	FFProtection_pRound = CreateConVar("l4d2_ffprotection_reset_round","1","Reset Friendly-Fire At the end of the round? (Overrides campaign reset)");
+	FFProtection_pCampaign = CreateConVar("l4d2_ffprotection_reset_finale","0","Reset Friendly-Fire At the end of the campaign?");
+
+	AutoExecConfig(true, "sky_ffpt_16r2");
+
 	HookEvent("player_hurt", PlayerHurt_Action);
+	//HookEvent("round_end", RoundEnd);
+
+	//HookEvent("round_start", RoundStart);
+
 	PrintToChatAll("\x03Sky's \x04Friendly-Fire Protection Tool \x03Loaded.");
 }
 
+/*public Action RoundStart(Event event, char[] event_name, bool dontBroadcast)
+{
+	if (firstRound > 3)
+	{
+		firstRound = 0;
+	}
+	if (firstRound < 1)
+	{
+		if (GetConVarInt(FFProtection_pCampaign) == 1)
+		{
+			for (int index; index <= MaxClients; index++)
+			{
+				totalDamage[index] = 0;
+			}
+		}
+		firstRound++;
+	}
+}*/
 
+/*public Action RoundEnd(Event event, char[] event_name, bool dontBroadcast)
+{
+	if (GetConVarInt(FFProtection_pRound) == 1)
+	{
+		for (int index; index <= MaxClients;index++)
+		{
+			totalDamage[index] = 0;
+		}
+	}
+}*/
 
 public Action PlayerHurt_Action(Event event, const char[] name, bool dontBroadcast)
 {
-	int victimUserId = event.GetInt("userid");
-	int attackerUserId = event.GetInt("attacker");
-	bool headshot = event.GetBool("headshot");
+	if (GetConVarInt(FFProtection_Enable) != 1)
+	{
+		return Plugin_Continue;
+	}
 
-	int healthRemaining = event.GetInt("health");
-	int dealtHealthDmg = event.GetInt("dmg_health");
-	int dealtArmorDmg = event.GetInt("dmg_armor");
+	int victimUserId = GetClientOfUserId(GetEventInt(event, "userid"));
+	int attackerUserId = GetEventInt(event, "attackerentid");
+	int attackerHealth;
+	int victimHurt = GetEventInt(event, "dmg_health");
 
-	int damageType = event.GetInt("type");
-
-	String weaponId = event.GetString("weapon");
-
-	
-	//PrintToChatAll("\x03 %N \x04damaged \x03 %N \x04for \x03 %d ", attackerUserId, victimUserId, dealtHealthDmg);
-	PrintToChatAll("Attacker: %N \nVictim: %N \nHealthAmount: %d \nArmorAmount: %d \nWeapong: %N \nHealthRemaining: %d", attackerUserId, victimUserId, dealtHealthDmg, dealtArmorDmg, weaponId, healthRemaining);
-	
+	char WeaponCallBack[32];
 	GetEventString(event, "weapon", WeaponCallBack, 32);
 
 	if ((!IsValidEntity(victimUserId)) || (!IsValidEntity(attackerUserId)))
@@ -157,7 +215,6 @@ public Action PlayerHurt_Action(Event event, const char[] name, bool dontBroadca
 			}
 		}
 	}
-	
 	return Plugin_Continue;
 }
 
@@ -172,7 +229,6 @@ public Action ShowDamageAmount(int client)
 	PrintToChat(client, "\x04Friendly-Fire This Round: \x03 %d",totalDamage[client]);
 	return Plugin_Handled;
 }
-
 
 public Action forgiveAll(int client, int args)
 {
