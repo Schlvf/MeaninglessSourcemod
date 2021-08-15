@@ -242,7 +242,7 @@ DropSlot_l4d2(client, slot, bool:drop=false)
 			{
 				new String:item[150];
 				GetEntPropString(oldweapon , Prop_Data, "m_ModelName", item, sizeof(item));
-				//PrintToChat(client, "%s", item);
+				PrintToChat(client, "%s", item);
 				if (StrEqual(item, MODEL_V_FIREAXE))
 				{
 					//DispatchKeyValue(index, "model", MODEL_V_FIREAXE);
