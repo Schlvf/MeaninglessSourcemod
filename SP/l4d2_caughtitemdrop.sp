@@ -111,7 +111,10 @@ public EventTongueGrab(Handle:event, const String:name[], bool:dontBroadcast)
 	if (GetConVarInt(cvarDropOnSmoker))
 	{
 		new client = GetClientOfUserId(GetEventInt(event, "victim"));
-		DropItem(client);
+		if(!IsFakeClient(client))
+		{
+			DropItem(client);
+		}
 	}
 }
 
@@ -120,7 +123,10 @@ public EventPlayerPounced(Handle:event, const String:name[], bool:dontBroadcast)
 	if (GetConVarInt(cvarDropOnHunter))
 	{
 		new client = GetClientOfUserId(GetEventInt(event, "victim"));
-		DropItem(client);
+		if(!IsFakeClient(client))
+		{
+			DropItem(client);
+		}
 	}
 }
 
@@ -129,7 +135,10 @@ public EventPlayerPummeled(Handle:event, const String:name[], bool:dontBroadcast
 	if (GetConVarInt(cvarDropOnCharger))
 	{
 		new client = GetClientOfUserId(GetEventInt(event, "victim"));
-		DropItem(client);
+		if(!IsFakeClient(client))
+		{
+			DropItem(client);
+		}
 	}
 }
 
@@ -138,7 +147,10 @@ public EventPlayerJockeyed(Handle:event, const String:name[], bool:dontBroadcast
 	if (GetConVarInt(cvarDropOnJockey))
 	{
 		new client = GetClientOfUserId(GetEventInt(event, "victim"));
-		DropItem(client);
+		if(!IsFakeClient(client))
+		{
+			DropItem(client);
+		}
 	}
 }
 

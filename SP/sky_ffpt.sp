@@ -97,7 +97,7 @@ public Action PlayerHurt_Action(Event event, const char[] name, bool dontBroadca
 	
 	//PrintToChatAll("\x03 %N \x04damaged \x03 %N \x04for \x03 %d ", attackerUserId, victimUserId, dealtHealthDmg);
 	PrintToChatAll("Attacker: %N \nVictim: %N \nHealthAmount: %d \nArmorAmount: %d \nWeapong: %N \nHealthRemaining: %d", attackerUserId, victimUserId, dealtHealthDmg, dealtArmorDmg, weaponId, healthRemaining);
-	/*
+	
 	GetEventString(event, "weapon", WeaponCallBack, 32);
 
 	if ((!IsValidEntity(victimUserId)) || (!IsValidEntity(attackerUserId)))
@@ -157,10 +157,10 @@ public Action PlayerHurt_Action(Event event, const char[] name, bool dontBroadca
 			}
 		}
 	}
-	*/
+	
 	return Plugin_Continue;
 }
-/*
+
 public Action damageAmount(int client, int args)
 {
 	ShowDamageAmount(client);
@@ -188,7 +188,7 @@ public Action forgiveMe(int client, int args)
 	totalDamage[client] = 0;
 	PrintToChat(client, "\x04Friendly-Fire Calculations Reset \x03for %d");
 }
-*/
+
 stock void SetIncapState(int client, int isIncapacitated)
 {
 	SetEntProp(client, Prop_Send, "m_isIncapacitated", isIncapacitated);
