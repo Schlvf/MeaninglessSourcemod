@@ -198,18 +198,28 @@ public Action PlayerHurt_Action(Event event, const char[] name, bool dontBroadca
 				//attackerHealth = (GetClientHealth(attackerUserId)-(victimHurt));
 				attackerHealth = (GetTotalHealth(attackerUserId)-(victimHurt));
 			}
-			if (attackerHealth < 1)
+			if (GetClientHealth(attackerUserId) < victimHurt)
 			{
 				if(GetEntProp(attackerUserId, Prop_Send, "m_currentReviveCount") >= GetConVarInt(FindConVar("survivor_max_incapacitated_count")))
 				{
 					ForcePlayerSuicide(attackerUserId);
 				}
-				else 
-				{
-					SetEntityHealth(attackerUserId, 1);
-					SetIncapState(attackerUserId, 1);
-					SetEntityHealth(attackerUserId, 299);
-				}
+				
+				if(GetTotalHealth(attackerUserId) < victimHurt)
+					{
+						if(GetEntProp(attackerUserId, Prop_Send, "m_currentReviveCount") >= GetConVarInt(FindConVar("survivor_max_incapacitated_count")))
+						{
+							ForcePlayerSuicide(attackerUserId);
+						}
+						SetEntityHealth(attackerUserId, 1);
+						SetIncapState(attackerUserId, 1);
+						SetEntityHealth(attackerUserId, 299);
+					}
+					else
+					{
+						SetEntPropFloat(attackerUserId, Prop_Send, "m_healthBuffer",0);
+						SetEntityHealth(attackerUserId, 1);
+					}
 			}
 			else if (attackerHealth >= 1)
 			{
