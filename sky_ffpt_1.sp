@@ -195,7 +195,8 @@ public Action PlayerHurt_Action(Event event, const char[] name, bool dontBroadca
 			PrintToChatAll("\x03 %N \x04damaged \x03 %N \x04for \x03 %d", attackerUserId, victimUserId, victimHurt);
 			if (GetConVarInt(FFProtection_Redirect) == 1) 
 			{
-				attackerHealth = (GetClientHealth(attackerUserId)-(victimHurt));
+				//attackerHealth = (GetClientHealth(attackerUserId)-(victimHurt));
+				attackerHealth = (GetTotalHealth(attackerUserId)-(victimHurt));
 			}
 			if (attackerHealth < 1)
 			{
@@ -257,4 +258,27 @@ stock bool IsIncaped(int client)
 		return true;
 	}
 	return false;
+}
+
+int GetPlayerTempHealth(int client)
+{
+	Handle painPillsDecayCvar = INVALID_HANDLE;
+
+	if (painPillsDecayCvar == INVALID_HANDLE)
+	{
+		painPillsDecayCvar = FindConVar("pain_pills_decay_rate");
+
+		if (painPillsDecayCvar == INVALID_HANDLE)
+			SetFailState("pain_pills_decay_rate not found.");
+	}
+
+	int tempHealth = RoundToCeil(GetEntPropFloat(client, Prop_Send, "m_healthBuffer") - ((GetGameTime() - GetEntPropFloat(client, Prop_Send, "m_healthBufferTime")) * GetConVarFloat(painPillsDecayCvar))) - 1;
+
+	return tempHealth < 0 ? 0 : tempHealth;
+}
+
+stock int GetTotalHealth(int client)
+{
+	int iHealth = GetEntProp(client, Prop_Send, "m_iHealth") + GetPlayerTempHealth(client);
+	return iHealth;
 }
