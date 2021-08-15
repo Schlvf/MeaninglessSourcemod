@@ -167,11 +167,11 @@ public Action PlayerHurt_Action(Event event, const char[] name, bool dontBroadca
 	{
 		return Plugin_Continue;
 	}
-	if(IsFakeClient(victimUserId))
+	/*if(IsFakeClient(victimUserId))
 	{
 		PrintToChatAll("\x03 %N \x04damaged \x03 %N \x04for \x03 %d", attackerUserId, victimUserId, victimHurt);
 		return Plugin_Continue;
-	}
+	}*/
 	if (StrEqual(WeaponCallBack, "inferno", false) || StrEqual(WeaponCallBack, "pipe_bomb", false) || StrEqual(WeaponCallBack, "fire_cracker_blast", false))
 	{	
 		return Plugin_Continue;
@@ -273,12 +273,13 @@ int GetPlayerTempHealth(int client)
 	}
 
 	int tempHealth = RoundToCeil(GetEntPropFloat(client, Prop_Send, "m_healthBuffer") - ((GetGameTime() - GetEntPropFloat(client, Prop_Send, "m_healthBufferTime")) * GetConVarFloat(painPillsDecayCvar))) - 1;
-
+	PrintToChat(client, "TEMP HEALTH %d", tempHealth);
 	return tempHealth < 0 ? 0 : tempHealth;
 }
 
 stock int GetTotalHealth(int client)
 {
 	int iHealth = GetEntProp(client, Prop_Send, "m_iHealth") + GetPlayerTempHealth(client);
+	PrintToChat(client, "TOTAL HEALTH %d", iHealth);
 	return iHealth;
 }
