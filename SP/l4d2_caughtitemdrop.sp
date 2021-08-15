@@ -18,6 +18,10 @@
 #define MODEL_V_ELECTRIC_GUITAR "models/weapons/melee/v_electric_guitar.mdl"
 #define MODEL_V_GOLFCLUB "models/weapons/melee/v_golfclub.mdl"
 
+//Sin update
+#define MODEL_V_SHOVEL "models/weapons/melee/v_shovel.mdl"
+#define MODEL_V_PITCHFORK "models/weapons/melee/v_pitchfork.mdl"
+
 #define PLUGIN_VERSION "1.1"
 #define ADVERT "\x04[\x03Caught Item Drop\x04] \x03You will drop current held item when caught by special infected\x04!"
 
@@ -294,6 +298,18 @@ public DropSlot(client, slot)
 				{
 					DispatchKeyValue(index, "model", MODEL_V_GOLFCLUB);
 					DispatchKeyValue(index, "melee_script_name", "golfclub")
+;
+				}
+				else if (StrEqual(item, MODEL_V_SHOVEL))
+				{
+					DispatchKeyValue(index, "model", MODEL_V_SHOVEL);
+					DispatchKeyValue(index, "melee_script_name", "shovel")
+;
+				}
+				else if (StrEqual(item, MODEL_V_PITCHFORK))
+				{
+					DispatchKeyValue(index, "model", MODEL_V_PITCHFORK);
+					DispatchKeyValue(index, "melee_script_name", "pitchfork")
 ;
 				}
 			}
