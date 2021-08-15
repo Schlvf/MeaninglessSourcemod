@@ -173,8 +173,8 @@ DropSlot2(client, slot, bool:drop=false)
 #define MODEL_V_KNIFE "models/v_models/v_knife_t.mdl"
 
 //Supongamos
-#define MODEL_V_PITCHFORK "models/v_models/v_pitchfork_t.mdl"
-#define MODEL_V_SHOVEL "models/v_models/v_shovel_t.mdl"
+#define MODEL_V_PITCHFORK "models/v_models/melee/v_pitchfork_t.mdl"
+#define MODEL_V_SHOVEL "models/v_models/melee/v_shovel_t.mdl"
 
 
 // code from kwski43 [L4D2] Caught Item Drop http://forums.alliedmods.net/showthread.php?t=133610
