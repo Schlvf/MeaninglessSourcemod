@@ -153,6 +153,8 @@ public Action PlayerHurt_Action(Event event, const char[] name, bool dontBroadca
 	int victimUserId = GetClientOfUserId(GetEventInt(event, "userid"));
 	int attackerUserId = GetEventInt(event, "attackerentid");
 	int attackerHealth;
+	int attackerHealthTemp;
+	int attackerHealthTotal;
 	int victimHurt = GetEventInt(event, "dmg_health");
 
 	char WeaponCallBack[32];
@@ -193,37 +195,41 @@ public Action PlayerHurt_Action(Event event, const char[] name, bool dontBroadca
 			//int tellClient = GetClientOfUserId(GetEventInt(event, "attacker"));
 			PrintToChatAll("Attacker Life: %d",GetClientHealth(attackerUserId));
 			PrintToChatAll("\x03 %N \x04damaged \x03 %N \x04for \x03 %d", attackerUserId, victimUserId, victimHurt);
-			if (GetConVarInt(FFProtection_Redirect) == 1) 
-			{
-				//attackerHealth = (GetClientHealth(attackerUserId)-(victimHurt));
-				attackerHealth = (GetTotalHealth(attackerUserId)-(victimHurt));
-			}
-			if (GetClientHealth(attackerUserId) < victimHurt)
-			{
-				if(GetEntProp(attackerUserId, Prop_Send, "m_currentReviveCount") >= GetConVarInt(FindConVar("survivor_max_incapacitated_count")))
-				{
-					ForcePlayerSuicide(attackerUserId);
-				}
-				
-				if(GetTotalHealth(attackerUserId) < victimHurt)
+		
+			attackerHealth = GetClientHealth(attackerUserId);
+			attackerHealthTemp = GetPlayerTempHealth(attackerUserId);
+			attackerHealthTotal = GetTotalHealth(attackerUserId);
+			
+			if (attackerHealth < victimHurt)
+			{				
+				if(attackerHealthTotal < victimHurt)
 					{
 						if(GetEntProp(attackerUserId, Prop_Send, "m_currentReviveCount") >= GetConVarInt(FindConVar("survivor_max_incapacitated_count")))
 						{
 							ForcePlayerSuicide(attackerUserId);
-						}
-						SetEntityHealth(attackerUserId, 1);
-						SetIncapState(attackerUserId, 1);
-						SetEntityHealth(attackerUserId, 299);
+						} 
+						else
+						{
+							SetEntPropFloat(attackerUserId, Prop_Send, "m_healthBuffer",0);
+							SetEntityHealth(attackerUserId, 1);
+							SetIncapState(attackerUserId, 1);
+							SetEntityHealth(attackerUserId, 299);
+						} 						
 					}
 					else
 					{
-						SetEntPropFloat(attackerUserId, Prop_Send, "m_healthBuffer",0);
-						SetEntityHealth(attackerUserId, 1);
+						if(attackerHealthTemp > victimHurt)
+						{
+							SetEntPropFloat(attackerUserId, Prop_Send, "m_healthBuffer", attackerHealthTemp - victimHurt);
+						} else {
+							SetEntPropFloat(attackerUserId, Prop_Send, "m_healthBuffer",0);
+							SetEntityHealth(attackerUserId, (attackerHealthTotal - victimHurt));
+						}
 					}
 			}
-			else if (attackerHealth >= 1)
+			else 
 			{
-				SetEntityHealth(attackerUserId, attackerHealth);
+				SetEntityHealth(attackerUserId, (attackerHealth - victimHurt));
 			}
 		}
 	}
