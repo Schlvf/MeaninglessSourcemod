@@ -91,7 +91,7 @@ GetCurrentWeaponSlot(client)
 	
 	decl String:weapon[32];
 	GetClientWeapon(client,weapon , 32);
-	PrintToChatAll("%s",weapon);
+	//PrintToChatAll("%s",weapon);
 	
 	if (StrEqual(weapon, "weapon_pumpshotgun") || StrEqual(weapon, "weapon_autoshotgun") || StrEqual(weapon, "weapon_rifle") || StrEqual(weapon, "weapon_smg") || StrEqual(weapon, "weapon_hunting_rifle") || StrEqual(weapon, "weapon_sniper_scout") || StrEqual(weapon, "weapon_sniper_military") || StrEqual(weapon, "weapon_sniper_awp") || StrEqual(weapon, "weapon_smg_silenced") || StrEqual(weapon, "weapon_smg_mp5") || StrEqual(weapon, "weapon_shotgun_spas") || StrEqual(weapon, "weapon_shotgun_chrome") || StrEqual(weapon, "weapon_rifle_sg552") || StrEqual(weapon, "weapon_rifle_desert") || StrEqual(weapon, "weapon_rifle_ak47") || StrEqual(weapon, "weapon_grenade_launcher") || StrEqual(weapon, "weapon_rifle_m60"))
 		slot=0;
@@ -173,8 +173,8 @@ DropSlot2(client, slot, bool:drop=false)
 #define MODEL_V_KNIFE "models/v_models/v_knife_t.mdl"
 
 //Supongamos
-#define MODEL_V_PITCHFORK "models/v_models/melee/v_pitchfork_t.mdl"
-#define MODEL_V_SHOVEL "models/v_models/melee/v_shovel_t.mdl"
+#define MODEL_V_PITCHFORK "models/v_models/melee/v_pitchfork.mdl"
+#define MODEL_V_SHOVEL "models/v_models/melee/v_shovel.mdl"
 
 
 // code from kwski43 [L4D2] Caught Item Drop http://forums.alliedmods.net/showthread.php?t=133610
@@ -242,7 +242,7 @@ DropSlot_l4d2(client, slot, bool:drop=false)
 			{
 				new String:item[150];
 				GetEntPropString(oldweapon , Prop_Data, "m_ModelName", item, sizeof(item));
-				PrintToChat(client, "%s", item);
+				//PrintToChat(client, "%s", item);
 				if (StrEqual(item, MODEL_V_FIREAXE))
 				{
 					//DispatchKeyValue(index, "model", MODEL_V_FIREAXE);
