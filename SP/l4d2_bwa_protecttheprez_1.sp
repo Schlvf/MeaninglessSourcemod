@@ -436,7 +436,7 @@ void SetThePrez(int client)
 		prevPrez[client] = true;
 		thePrez = client;
 		SetClientColors(thePrez, GetClientHealth(thePrez));
-		SDKHook(client, SDKHook_WeaponCanUse, OnWeaponCanUse);
+		//SDKHook(client, SDKHook_WeaponCanUse, OnWeaponCanUse);
 		//StripWeapons(thePrez);
 		//if (!GetConVarBool(prezCanHeal)) { RemoveItemFromSlot(thePrez, WEP_SLOT_HEALTH); }
 		//GiveHandgun(client, GetConVarBool(prezAllowMagnum)); 
@@ -605,13 +605,12 @@ public int GetCurrentWeaponSlot(int client, char[] weapon)
 public Action Event_weapon_fire(Event event, const char[] name, bool dontBroadcast)
 {	
 	int tmp = GetClientOfUserId(GetEventInt(event, "userid"));
-	char weapon[32];
-	GetEventString(event, "weapon", weapon, 32);
-	PrintToChatAll("%s",weapon);
 	if (tmp == thePrez)
 	{	
-		if (GetCurrentWeaponSlot(tmp,weapon) == 1){
-			//DropSlot_l4d2(tmp, 1, false);
+		char weapon[32];
+		GetEventString(event, "weapon", weapon, 32);
+		if (GetCurrentWeaponSlot(tmp,weapon) == 0){
+			DropSlot_l4d2(tmp, 0, false, weapon);
 			PrintToChatAll("\x03The president can't use primary weapons");
 		}
 
@@ -1074,56 +1073,57 @@ void UnlockDoor(int door)
 	AcceptEntityInput(door, "Unlock");	
 }
 
-void DropSlot_l4d2(int client,int slot, bool drop=false)
+void DropSlot_l4d2(int client,int slot, bool drop=false, char[] weapon)
 {
 	int oldweapon;
 	oldweapon=GetPlayerWeaponSlot(client, slot);
+	//oldweapon=slot;
 	if (oldweapon > 0)
 	{
-		char weapon[32];
+		//char weapon[32];
 		int ammo;
 		int clip;
 		int upgrade;
 		int upammo;
 		int ammoOffset = FindSendPropInfo("CTerrorPlayer", "m_iAmmo");
-		GetEdictClassname(oldweapon, weapon, 32);
+		//GetEdictClassname(oldweapon, weapon, 32);
 
 		if (slot == 0)
 		{
 			clip = GetEntProp(oldweapon, Prop_Send, "m_iClip1");
 			upgrade = GetEntProp(oldweapon, Prop_Send, "m_upgradeBitVec");
 			upammo = GetEntProp(oldweapon, Prop_Send, "m_nUpgradedPrimaryAmmoLoaded");
-			if (StrEqual(weapon, "weapon_rifle") || StrEqual(weapon, "weapon_rifle_sg552") || StrEqual(weapon, "weapon_rifle_desert") || StrEqual(weapon, "weapon_rifle_ak47"))
+			if (StrEqual(weapon, "rifle") || StrEqual(weapon, "rifle_sg552") || StrEqual(weapon, "rifle_desert") || StrEqual(weapon, "rifle_ak47"))
 			{
 				ammo = GetEntData(client, ammoOffset+(12));
 				SetEntData(client, ammoOffset+(12), 0);
 			}
-			else if (StrEqual(weapon, "weapon_smg") || StrEqual(weapon, "weapon_smg_silenced") || StrEqual(weapon, "weapon_smg_mp5"))
+			else if (StrEqual(weapon, "smg") || StrEqual(weapon, "smg_silenced") || StrEqual(weapon, "smg_mp5"))
 			{
 				ammo = GetEntData(client, ammoOffset+(20));
 				SetEntData(client, ammoOffset+(20), 0);
 			}
-			else if (StrEqual(weapon, "weapon_pumpshotgun") || StrEqual(weapon, "weapon_shotgun_chrome"))
+			else if (StrEqual(weapon, "pumpshotgun") || StrEqual(weapon, "shotgun_chrome"))
 			{
 				ammo = GetEntData(client, ammoOffset+(28));
 				SetEntData(client, ammoOffset+(28), 0);
 			}
-			else if (StrEqual(weapon, "weapon_autoshotgun") || StrEqual(weapon, "weapon_shotgun_spas"))
+			else if (StrEqual(weapon, "autoshotgun") || StrEqual(weapon, "shotgun_spas"))
 			{
 				ammo = GetEntData(client, ammoOffset+(32));
 				SetEntData(client, ammoOffset+(32), 0);
 			}
-			else if (StrEqual(weapon, "weapon_hunting_rifle"))
+			else if (StrEqual(weapon, "hunting_rifle"))
 			{
 				ammo = GetEntData(client, ammoOffset+(36));
 				SetEntData(client, ammoOffset+(36), 0);
 			}
-			else if (StrEqual(weapon, "weapon_sniper_scout") || StrEqual(weapon, "weapon_sniper_military") || StrEqual(weapon, "weapon_sniper_awp"))
+			else if (StrEqual(weapon, "sniper_scout") || StrEqual(weapon, "sniper_military") || StrEqual(weapon, "sniper_awp"))
 			{
 				ammo = GetEntData(client, ammoOffset+(40));
 				SetEntData(client, ammoOffset+(40), 0);
 			}
-			else if (StrEqual(weapon, "weapon_grenade_launcher"))
+			else if (StrEqual(weapon, "grenade_launcher"))
 			{
 				ammo = GetEntData(client, ammoOffset+(68));
 				SetEntData(client, ammoOffset+(68), 0);
@@ -1135,7 +1135,7 @@ void DropSlot_l4d2(int client,int slot, bool drop=false)
 		bool dual=false;
 		if (slot == 1)
 		{
-			if (StrEqual(weapon, "weapon_melee"))
+			if (StrEqual(weapon, "melee"))
 			{
 				char item[150];
 				GetEntPropString(oldweapon , Prop_Data, "m_ModelName", item, sizeof(item));
@@ -1215,17 +1215,17 @@ void DropSlot_l4d2(int client,int slot, bool drop=false)
 				}
 				else return;
 			}
-			else if (StrEqual(weapon, "weapon_chainsaw"))
+			else if (StrEqual(weapon, "chainsaw"))
 			{
 				clip = GetEntProp(oldweapon, Prop_Send, "m_iClip1");
 			}
-			else if (StrEqual(weapon, "weapon_pistol"))
+			else if (StrEqual(weapon, "pistol"))
 			{
 				clip = GetEntProp(oldweapon, Prop_Send, "m_iClip1");
 				dual = GetEntProp(oldweapon, Prop_Send, "m_hasDualWeapons"); 
 				if(dual)clip=0;
 			}
-			else if (StrEqual(weapon, "weapon_pistol_magnum"))
+			else if (StrEqual(weapon, "pistol_magnum"))
 			{
 				clip = GetEntProp(oldweapon, Prop_Send, "m_iClip1");
 			}
@@ -1257,7 +1257,7 @@ void DropSlot_l4d2(int client,int slot, bool drop=false)
 
 		if (slot == 1)
 		{
-			if (StrEqual(weapon, "weapon_chainsaw") || StrEqual(weapon, "weapon_pistol"))
+			if (StrEqual(weapon, "chainsaw") || StrEqual(weapon, "pistol"))
 			{
 				SetEntProp(index, Prop_Send, "m_iClip1", clip);
 			}
