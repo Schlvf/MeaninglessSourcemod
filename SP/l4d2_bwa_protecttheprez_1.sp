@@ -588,15 +588,15 @@ public int GetCurrentWeaponSlot(int client, char[] weapon)
 	
 	PrintToChatAll("%s",weapon);
 	
-	if (StrEqual(weapon, "weapon_pumpshotgun") || StrEqual(weapon, "weapon_autoshotgun") || StrEqual(weapon, "weapon_rifle") || StrEqual(weapon, "weapon_smg") || StrEqual(weapon, "weapon_hunting_rifle") || StrEqual(weapon, "weapon_sniper_scout") || StrEqual(weapon, "weapon_sniper_military") || StrEqual(weapon, "weapon_sniper_awp") || StrEqual(weapon, "weapon_smg_silenced") || StrEqual(weapon, "weapon_smg_mp5") || StrEqual(weapon, "weapon_shotgun_spas") || StrEqual(weapon, "weapon_shotgun_chrome") || StrEqual(weapon, "weapon_rifle_sg552") || StrEqual(weapon, "weapon_rifle_desert") || StrEqual(weapon, "weapon_rifle_ak47") || StrEqual(weapon, "weapon_grenade_launcher") || StrEqual(weapon, "weapon_rifle_m60"))
+	if (StrEqual(weapon, "pumpshotgun") || StrEqual(weapon, "autoshotgun") || StrEqual(weapon, "rifle") || StrEqual(weapon, "smg") || StrEqual(weapon, "hunting_rifle") || StrEqual(weapon, "sniper_scout") || StrEqual(weapon, "sniper_military") || StrEqual(weapon, "sniper_awp") || StrEqual(weapon, "smg_silenced") || StrEqual(weapon, "smg_mp5") || StrEqual(weapon, "shotgun_spas") || StrEqual(weapon, "shotgun_chrome") || StrEqual(weapon, "rifle_sg552") || StrEqual(weapon, "rifle_desert") || StrEqual(weapon, "rifle_ak47") || StrEqual(weapon, "grenade_launcher") || StrEqual(weapon, "rifle_m60"))
 		slot=0;
-	else if (StrEqual(weapon, "weapon_pistol") || StrEqual(weapon, "weapon_pistol_magnum") || StrEqual(weapon, "weapon_chainsaw") || StrEqual(weapon, "weapon_melee"))
+	else if (StrEqual(weapon, "pistol") || StrEqual(weapon, "pistol_magnum") || StrEqual(weapon, "chainsaw") || StrEqual(weapon, "melee"))
 		slot=1;
-	else if (StrEqual(weapon, "weapon_pipe_bomb") || StrEqual(weapon, "weapon_molotov") || StrEqual(weapon, "weapon_vomitjar"))
+	else if (StrEqual(weapon, "pipe_bomb") || StrEqual(weapon, "molotov") || StrEqual(weapon, "vomitjar"))
 		slot=2;
-	else if (StrEqual(weapon, "weapon_first_aid_kit") || StrEqual(weapon, "weapon_defibrillator") || StrEqual(weapon, "weapon_upgradepack_explosive") || StrEqual(weapon, "weapon_upgradepack_incendiary"))
+	else if (StrEqual(weapon, "first_aid_kit") || StrEqual(weapon, "defibrillator") || StrEqual(weapon, "upgradepack_explosive") || StrEqual(weapon, "upgradepack_incendiary"))
 		slot=3;
-	else if (StrEqual(weapon, "weapon_pain_pills") || StrEqual(weapon, "weapon_adrenaline"))
+	else if (StrEqual(weapon, "pain_pills") || StrEqual(weapon, "adrenaline"))
 		slot=4;
 	PrintToChatAll("\x03 Slot %i",slot);
 	return slot;
