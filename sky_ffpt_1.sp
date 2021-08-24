@@ -132,11 +132,11 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 	//PrintToServer("g_bCvarAllow: %b", g_bCvarAllow);
 	//debug damage
 	//PrintToServer("Vic: %i, Atk: %i, Inf: %i, Dam: %f, DamTyp: %i, Wpn: %i", victim, attacker, inflictor, damage, damagetype, weapon);
-	PrintToChatAll("\x03 %N \x04damaged \x03 %N \x04for \x03 %d", attacker, victim, damage);
+	PrintToChatAll("\x03 %N \x04damaged \x03 %N \x04for \x03 %f", attacker, victim, damage);
 	//attacker and victim survivor checks
 	if (IsValidClientAndInGameAndSurvivor(attacker) && IsValidClientAndInGameAndSurvivor(victim) && victim != attacker)
 	{
-		if (IsFakeClient(attacker) || IsFakeClient(victim) || IsIncaped(victim)) 
+		if (IsFakeClient(attacker) || IsFakeClient(victim) || IsIncaped(victim))
 		{
 			//treat friendly-fire from bot attacker normally, which is 0 damage anyway
 			return Plugin_Continue;
@@ -183,11 +183,16 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 		*/
 		else
 		{
-			//inflict (non-chainsaw) damage to attacker
-			//add 1HP to victim then damage them for 1HP so the displayed message and vocalization order are correct,
-			//then damage attacker as self-inflicted for actual damage so there is no vocalization, just pain grunt.
-			SetEntityHealth(victim, GetClientHealth(victim) + 1);
-			SDKHooks_TakeDamage(victim, inflictor, attacker, 1.0, 0, weapon, g_fDmgFrc, g_fDmgPos);
+			if(GetClientHealth(victim) == 1)
+			{
+				SetIncapState(victim, 0);
+				SetEntityHealth(victim, 1);
+			}
+			else
+			{
+				SetEntityHealth(victim, GetClientHealth(victim) + 1);
+				SDKHooks_TakeDamage(victim, inflictor, attacker, 1.0, 0, weapon, g_fDmgFrc, g_fDmgPos);
+			}			
 			SDKHooks_TakeDamage(attacker, inflictor, attacker, damage, damagetype, weapon, damageForce, damagePosition);
 		}
 		//no damage for victim
