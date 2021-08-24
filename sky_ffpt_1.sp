@@ -183,7 +183,7 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 		*/
 		else
 		{
-			PrintToChatAll("\x03 %N \x04damaged \x03 %N \x04for \x03 %i", attacker, victim, damage);
+			PrintToChatAll("\x03 %N \x04damaged \x03 %N \x04for \x03 %d", attacker, victim, damage);
 			if(GetClientHealth(victim) != 1)
 			{
 				//SetIncapState(victim, 0);
