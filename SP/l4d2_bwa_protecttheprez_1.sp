@@ -582,14 +582,12 @@ public Action Event_heal_begin(Event event, const char[] name, bool dontBroadcas
 	return Plugin_Continue;
 }
 
-public int GetCurrentWeaponSlot(int client)
+public int GetCurrentWeaponSlot(int client, char[] weapon)
 {
 	int slot=-1; 
 	
-	char weapon[32];
-	GetClientWeapon(client,weapon, 32);
 	PrintToChatAll("%s",weapon);
-	/*
+	
 	if (StrEqual(weapon, "weapon_pumpshotgun") || StrEqual(weapon, "weapon_autoshotgun") || StrEqual(weapon, "weapon_rifle") || StrEqual(weapon, "weapon_smg") || StrEqual(weapon, "weapon_hunting_rifle") || StrEqual(weapon, "weapon_sniper_scout") || StrEqual(weapon, "weapon_sniper_military") || StrEqual(weapon, "weapon_sniper_awp") || StrEqual(weapon, "weapon_smg_silenced") || StrEqual(weapon, "weapon_smg_mp5") || StrEqual(weapon, "weapon_shotgun_spas") || StrEqual(weapon, "weapon_shotgun_chrome") || StrEqual(weapon, "weapon_rifle_sg552") || StrEqual(weapon, "weapon_rifle_desert") || StrEqual(weapon, "weapon_rifle_ak47") || StrEqual(weapon, "weapon_grenade_launcher") || StrEqual(weapon, "weapon_rifle_m60"))
 		slot=0;
 	else if (StrEqual(weapon, "weapon_pistol") || StrEqual(weapon, "weapon_pistol_magnum") || StrEqual(weapon, "weapon_chainsaw") || StrEqual(weapon, "weapon_melee"))
@@ -601,7 +599,6 @@ public int GetCurrentWeaponSlot(int client)
 	else if (StrEqual(weapon, "weapon_pain_pills") || StrEqual(weapon, "weapon_adrenaline"))
 		slot=4;
 	PrintToChatAll("\x03 Slot %i",slot);
-	*/
 	return slot;
 }
 
@@ -613,10 +610,10 @@ public Action Event_weapon_fire(Event event, const char[] name, bool dontBroadca
 	PrintToChatAll("%s",weapon);
 	if (tmp == thePrez)
 	{	
-		//if (GetCurrentWeaponSlot(tmp) == 1){
+		if (GetCurrentWeaponSlot(tmp,weapon) == 1){
 			//DropSlot_l4d2(tmp, 1, false);
-		PrintToChatAll("\x03The president can't use primary weapons");
-		//}
+			PrintToChatAll("\x03The president can't use primary weapons");
+		}
 
 		//PrintToChatAll("\x03The president can't use primary weapons");
 		return Plugin_Handled;
