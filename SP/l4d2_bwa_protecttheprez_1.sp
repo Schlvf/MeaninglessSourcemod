@@ -21,6 +21,23 @@ const int WEP_SLOT_MELEE = 1;
 const int WEP_SLOT_GRENADE = 2;
 const int WEP_SLOT_HEALTH = 3;
 
+#define MODEL_V_FIREAXE "models/weapons/melee/v_fireaxe.mdl"
+#define MODEL_V_FRYING_PAN "models/weapons/melee/v_frying_pan.mdl"
+#define MODEL_V_MACHETE "models/weapons/melee/v_machete.mdl"
+#define MODEL_V_BASEBALL_BAT "models/weapons/melee/v_bat.mdl"
+#define MODEL_V_CROWBAR "models/weapons/melee/v_crowbar.mdl"
+#define MODEL_V_CRICKET_BAT "models/weapons/melee/v_cricket_bat.mdl"
+#define MODEL_V_TONFA "models/weapons/melee/v_tonfa.mdl"
+#define MODEL_V_KATANA "models/weapons/melee/v_katana.mdl"
+#define MODEL_V_ELECTRIC_GUITAR "models/weapons/melee/v_electric_guitar.mdl"
+#define MODEL_V_GOLFCLUB "models/weapons/melee/v_golfclub.mdl"
+#define MODEL_V_SHIELD "models/weapons/melee/v_riotshield.mdl"
+#define MODEL_V_KNIFE "models/v_models/v_knife_t.mdl"
+
+//Supongamos
+#define MODEL_V_PITCHFORK "models/weapons/melee/v_pitchfork.mdl"
+#define MODEL_V_SHOVEL "models/weapons/melee/v_shovel.mdl"
+
 #define PLUGIN_VERSION "1.0.4"
 
 public Plugin myinfo =
@@ -565,24 +582,42 @@ public Action Event_heal_begin(Event event, const char[] name, bool dontBroadcas
 	return Plugin_Continue;
 }
 
+public int GetCurrentWeaponSlot(int client)
+{
+	int slot=-1; 
+	
+	char weapon[32];
+	GetClientWeapon(client,weapon , 32);
+	//PrintToChatAll("%s",weapon);
+	
+	if (StrEqual(weapon, "weapon_pumpshotgun") || StrEqual(weapon, "weapon_autoshotgun") || StrEqual(weapon, "weapon_rifle") || StrEqual(weapon, "weapon_smg") || StrEqual(weapon, "weapon_hunting_rifle") || StrEqual(weapon, "weapon_sniper_scout") || StrEqual(weapon, "weapon_sniper_military") || StrEqual(weapon, "weapon_sniper_awp") || StrEqual(weapon, "weapon_smg_silenced") || StrEqual(weapon, "weapon_smg_mp5") || StrEqual(weapon, "weapon_shotgun_spas") || StrEqual(weapon, "weapon_shotgun_chrome") || StrEqual(weapon, "weapon_rifle_sg552") || StrEqual(weapon, "weapon_rifle_desert") || StrEqual(weapon, "weapon_rifle_ak47") || StrEqual(weapon, "weapon_grenade_launcher") || StrEqual(weapon, "weapon_rifle_m60"))
+		slot=0;
+	else if (StrEqual(weapon, "weapon_pistol") || StrEqual(weapon, "weapon_pistol_magnum") || StrEqual(weapon, "weapon_chainsaw") || StrEqual(weapon, "weapon_melee"))
+		slot=1;
+	else if (StrEqual(weapon, "weapon_pipe_bomb") || StrEqual(weapon, "weapon_molotov") || StrEqual(weapon, "weapon_vomitjar"))
+		slot=2;
+	else if (StrEqual(weapon, "weapon_first_aid_kit") || StrEqual(weapon, "weapon_defibrillator") || StrEqual(weapon, "weapon_upgradepack_explosive") || StrEqual(weapon, "weapon_upgradepack_incendiary"))
+		slot=3;
+	else if (StrEqual(weapon, "weapon_pain_pills") || StrEqual(weapon, "weapon_adrenaline"))
+		slot=4;
+
+	return slot;
+}
+
 public Action Event_weapon_fire(Event event, const char[] name, bool dontBroadcast)
 {	
 	int tmp = GetClientOfUserId(GetEventInt(event, "userid"));
-	PrintToChatAll("\x03 %i fired", tmp);
-	
-	/*if (tmp == thePrez)
-	{	int index = CreateEntityByName("weapon_first_aid_kit");
-		float origin[3];
-		GetEntPropVector(tmp, Prop_Send, "m_vecOrigin", origin);
-		origin[2]+=20;
-		TeleportEntity(index, origin, NULL_VECTOR, NULL_VECTOR);
-		DispatchSpawn(index);
-		ActivateEntity(index);
-		RemovePlayerItem(tmp, GetPlayerWeaponSlot(tmp, 3));
-		PrintToChatAll("\x03The president can't heal anybody");
+
+	if (tmp == thePrez)
+	{	
+		if (GetCurrentWeaponSlot(tmp) == 1){
+			DropSlot_l4d2(tmp, 1, false);
+		}
+
+		PrintToChatAll("\x03The president can't use primary weapons");
 		return Plugin_Handled;
 	}
-	*/
+	
 	return Plugin_Continue;
 }
 
@@ -1036,4 +1071,201 @@ void UnlockDoor(int door)
 
 	SetEntProp(door, Prop_Data, "m_hasUnlockSequence", 0);
 	AcceptEntityInput(door, "Unlock");	
+}
+
+void DropSlot_l4d2(int client,int slot, bool drop=false)
+{
+	int oldweapon;
+	oldweapon=GetPlayerWeaponSlot(client, slot);
+	if (oldweapon > 0)
+	{
+		char weapon[32];
+		int ammo;
+		int clip;
+		int upgrade;
+		int upammo;
+		int ammoOffset = FindSendPropInfo("CTerrorPlayer", "m_iAmmo");
+		GetEdictClassname(oldweapon, weapon, 32);
+
+		if (slot == 0)
+		{
+			clip = GetEntProp(oldweapon, Prop_Send, "m_iClip1");
+			upgrade = GetEntProp(oldweapon, Prop_Send, "m_upgradeBitVec");
+			upammo = GetEntProp(oldweapon, Prop_Send, "m_nUpgradedPrimaryAmmoLoaded");
+			if (StrEqual(weapon, "weapon_rifle") || StrEqual(weapon, "weapon_rifle_sg552") || StrEqual(weapon, "weapon_rifle_desert") || StrEqual(weapon, "weapon_rifle_ak47"))
+			{
+				ammo = GetEntData(client, ammoOffset+(12));
+				SetEntData(client, ammoOffset+(12), 0);
+			}
+			else if (StrEqual(weapon, "weapon_smg") || StrEqual(weapon, "weapon_smg_silenced") || StrEqual(weapon, "weapon_smg_mp5"))
+			{
+				ammo = GetEntData(client, ammoOffset+(20));
+				SetEntData(client, ammoOffset+(20), 0);
+			}
+			else if (StrEqual(weapon, "weapon_pumpshotgun") || StrEqual(weapon, "weapon_shotgun_chrome"))
+			{
+				ammo = GetEntData(client, ammoOffset+(28));
+				SetEntData(client, ammoOffset+(28), 0);
+			}
+			else if (StrEqual(weapon, "weapon_autoshotgun") || StrEqual(weapon, "weapon_shotgun_spas"))
+			{
+				ammo = GetEntData(client, ammoOffset+(32));
+				SetEntData(client, ammoOffset+(32), 0);
+			}
+			else if (StrEqual(weapon, "weapon_hunting_rifle"))
+			{
+				ammo = GetEntData(client, ammoOffset+(36));
+				SetEntData(client, ammoOffset+(36), 0);
+			}
+			else if (StrEqual(weapon, "weapon_sniper_scout") || StrEqual(weapon, "weapon_sniper_military") || StrEqual(weapon, "weapon_sniper_awp"))
+			{
+				ammo = GetEntData(client, ammoOffset+(40));
+				SetEntData(client, ammoOffset+(40), 0);
+			}
+			else if (StrEqual(weapon, "weapon_grenade_launcher"))
+			{
+				ammo = GetEntData(client, ammoOffset+(68));
+				SetEntData(client, ammoOffset+(68), 0);
+			}
+			else return;
+		}
+		int index = CreateEntityByName(weapon); 
+		//index=oldweapon;
+		bool dual=false;
+		if (slot == 1)
+		{
+			if (StrEqual(weapon, "weapon_melee"))
+			{
+				char item[150];
+				GetEntPropString(oldweapon , Prop_Data, "m_ModelName", item, sizeof(item));
+				//PrintToChat(client, "%s", item);
+				if (StrEqual(item, MODEL_V_FIREAXE))
+				{
+					//DispatchKeyValue(index, "model", MODEL_V_FIREAXE);
+					DispatchKeyValue(index, "melee_script_name", "fireaxe");
+				}
+				else if (StrEqual(item, MODEL_V_FRYING_PAN))
+				{
+					//DispatchKeyValue(index, "model", MODEL_V_FRYING_PAN);
+					DispatchKeyValue(index, "melee_script_name", "frying_pan");
+				}
+				else if (StrEqual(item, MODEL_V_MACHETE))
+				{
+					//DispatchKeyValue(index, "model", MODEL_V_MACHETE);
+					DispatchKeyValue(index, "melee_script_name", "machete");
+				}
+				else if (StrEqual(item, MODEL_V_BASEBALL_BAT))
+				{
+					//DispatchKeyValue(index, "model", MODEL_V_BASEBALL_BAT);
+					DispatchKeyValue(index, "melee_script_name", "baseball_bat");
+				}
+				else if (StrEqual(item, MODEL_V_CROWBAR))
+				{
+					//DispatchKeyValue(index, "model", MODEL_V_CROWBAR);
+					DispatchKeyValue(index, "melee_script_name", "crowbar");
+				}
+				else if (StrEqual(item, MODEL_V_CRICKET_BAT))
+				{
+					//DispatchKeyValue(index, "model", MODEL_V_CRICKET_BAT);
+					DispatchKeyValue(index, "melee_script_name", "cricket_bat");
+				}
+				else if (StrEqual(item, MODEL_V_TONFA))
+				{
+					//DispatchKeyValue(index, "model", MODEL_V_TONFA);
+					DispatchKeyValue(index, "melee_script_name", "tonfa");
+				}
+				else if (StrEqual(item, MODEL_V_KATANA))
+				{
+					//DispatchKeyValue(index, "model", MODEL_V_KATANA);
+					DispatchKeyValue(index, "melee_script_name", "katana");
+				}
+				else if (StrEqual(item, MODEL_V_ELECTRIC_GUITAR))
+				{
+					//DispatchKeyValue(index, "model", MODEL_V_ELECTRIC_GUITAR);
+					DispatchKeyValue(index, "melee_script_name", "electric_guitar");
+				}
+				else if (StrEqual(item, MODEL_V_GOLFCLUB))
+				{
+					//DispatchKeyValue(index, "model", MODEL_V_GOLFCLUB);
+					DispatchKeyValue(index, "melee_script_name", "golfclub");
+				}
+				else if (StrEqual(item, MODEL_V_SHIELD))
+				{
+					//DispatchKeyValue(index, "model", MODEL_V_GOLFCLUB);
+					DispatchKeyValue(index, "melee_script_name", "riotshield");
+				}
+				else if (StrEqual(item, MODEL_V_KNIFE))
+				{
+					//DispatchKeyValue(index, "model", MODEL_V_GOLFCLUB);
+					DispatchKeyValue(index, "melee_script_name", "knife");
+				}
+
+				// Supongamos
+
+				else if (StrEqual(item, MODEL_V_SHOVEL))
+				{
+					//DispatchKeyValue(index, "model", MODEL_V_GOLFCLUB);
+					DispatchKeyValue(index, "melee_script_name", "shovel");
+				}
+				else if (StrEqual(item, MODEL_V_PITCHFORK))
+				{
+					//DispatchKeyValue(index, "model", MODEL_V_GOLFCLUB);
+					DispatchKeyValue(index, "melee_script_name", "pitchfork");
+				}
+				else return;
+			}
+			else if (StrEqual(weapon, "weapon_chainsaw"))
+			{
+				clip = GetEntProp(oldweapon, Prop_Send, "m_iClip1");
+			}
+			else if (StrEqual(weapon, "weapon_pistol"))
+			{
+				clip = GetEntProp(oldweapon, Prop_Send, "m_iClip1");
+				dual = GetEntProp(oldweapon, Prop_Send, "m_hasDualWeapons"); 
+				if(dual)clip=0;
+			}
+			else if (StrEqual(weapon, "weapon_pistol_magnum"))
+			{
+				clip = GetEntProp(oldweapon, Prop_Send, "m_iClip1");
+			}
+			else return;
+		}
+		
+		RemovePlayerItem(client, oldweapon);
+		
+		float origin[3];
+		float ang[3];
+		GetClientEyePosition(client,origin);
+		GetClientEyeAngles(client, ang);
+		GetAngleVectors(ang, ang, NULL_VECTOR,NULL_VECTOR);
+		NormalizeVector(ang,ang);
+		if(drop)ScaleVector(ang, 500.0);
+		else ScaleVector(ang, 300.0);
+		
+		DispatchSpawn(index);
+		TeleportEntity(index, origin, NULL_VECTOR, ang);
+		ActivateEntity(index); 
+
+		if (slot == 0)
+		{
+			SetEntProp(index, Prop_Send, "m_iExtraPrimaryAmmo", ammo);
+			SetEntProp(index, Prop_Send, "m_iClip1", clip);
+			SetEntProp(index, Prop_Send, "m_upgradeBitVec", upgrade);
+			SetEntProp(index, Prop_Send, "m_nUpgradedPrimaryAmmoLoaded", upammo);
+		}
+
+		if (slot == 1)
+		{
+			if (StrEqual(weapon, "weapon_chainsaw") || StrEqual(weapon, "weapon_pistol"))
+			{
+				SetEntProp(index, Prop_Send, "m_iClip1", clip);
+			}
+			if(dual)
+			{
+				SetCommandFlags("give", GetCommandFlags("give") & ~FCVAR_CHEAT);
+				FakeClientCommand(client, "give pistol");
+				SetCommandFlags("give", GetCommandFlags("give") | FCVAR_CHEAT);
+			}
+		}
+	}
 }
