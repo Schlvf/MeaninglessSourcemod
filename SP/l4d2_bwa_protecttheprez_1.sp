@@ -586,8 +586,6 @@ public int GetCurrentWeaponSlot(int client, char[] weapon)
 {
 	int slot=-1; 
 	
-	PrintToChatAll("%s",weapon);
-	
 	if (StrEqual(weapon, "pumpshotgun") || StrEqual(weapon, "autoshotgun") || StrEqual(weapon, "rifle") || StrEqual(weapon, "smg") || StrEqual(weapon, "hunting_rifle") || StrEqual(weapon, "sniper_scout") || StrEqual(weapon, "sniper_military") || StrEqual(weapon, "sniper_awp") || StrEqual(weapon, "smg_silenced") || StrEqual(weapon, "smg_mp5") || StrEqual(weapon, "shotgun_spas") || StrEqual(weapon, "shotgun_chrome") || StrEqual(weapon, "rifle_sg552") || StrEqual(weapon, "rifle_desert") || StrEqual(weapon, "rifle_ak47") || StrEqual(weapon, "grenade_launcher") || StrEqual(weapon, "rifle_m60"))
 		slot=0;
 	else if (StrEqual(weapon, "pistol") || StrEqual(weapon, "pistol_magnum") || StrEqual(weapon, "chainsaw") || StrEqual(weapon, "melee"))
@@ -610,6 +608,7 @@ public Action Event_weapon_fire(Event event, const char[] name, bool dontBroadca
 		char weapon[32];
 		GetEventString(event, "weapon", weapon, 32);
 		if (GetCurrentWeaponSlot(tmp,weapon) == 0){
+			PrintToChatAll("%s",weapon);
 			DropSlot_l4d2(tmp, 0, false, weapon);
 			PrintToChatAll("\x03The president can't use primary weapons");
 		}
