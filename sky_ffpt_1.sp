@@ -28,6 +28,9 @@ Effect, etc.
 #pragma newdecls required
 #include <sourcemod>
 #include <sdktools>
+
+#include <sdkhooks>
+
 #define PLUGIN_VERSION "1.7"
 #define SURVIVORTEAM 2
 
@@ -60,6 +63,8 @@ int totalDamage[MAXPLAYERS + 1];
 int kickMax[MAXPLAYERS + 1];
 int wasSlayed[MAXPLAYERS + 1];
 int firstRound;
+float g_fDmgFrc[3] = {0.0, 0.0, 0.0};
+float g_fDmgPos[3] = {0.0, 0.0, 0.0};
 
 public Plugin myinfo =
 {
@@ -70,13 +75,14 @@ public Plugin myinfo =
 	url = "http://sky-gaming.org"
 };
 
+public void OnClientPutInServer(int client)
+{
+	SDKHook(client, SDKHook_OnTakeDamage, OnTakeDamage);
+}
+
 public void OnPluginStart()
 {
 	CreateConVar("sky_ffpt_ver", PLUGIN_VERSION, "Sky_ffpt_Ver", FCVAR_SPONLY|FCVAR_REPLICATED|FCVAR_NOTIFY);
-
-	RegConsoleCmd("damage", damageAmount);
-	RegAdminCmd("forgiveall", forgiveAll, ADMFLAG_KICK);
-	RegAdminCmd("forgiveme", forgiveMe, ADMFLAG_KICK);
 
 	FFProtection_Enable = CreateConVar("l4d2_ffprotection_enable","1","Enable or Disable the plugin.");
 	FFProtection_Punish = CreateConVar("l4d2_ffprotection_punish","1","Punish the Attacking Teammate?");
@@ -105,135 +111,119 @@ public void OnPluginStart()
 
 	AutoExecConfig(true, "sky_ffpt_16r2");
 
-	HookEvent("player_hurt", PlayerHurt_Action);
+	//HookEvent("player_hurt", PlayerHurt_Action);
 	//HookEvent("round_end", RoundEnd);
 
 	//HookEvent("round_start", RoundStart);
 
 	PrintToChatAll("\x03Sky's \x04Friendly-Fire Protection Tool \x03Loaded.");
+
+	for (int i = 1; i <= MaxClients; i++)
+    {
+        if (!IsClientInGame(i))
+            continue;
+        SDKHook(i, SDKHook_OnTakeDamage, OnTakeDamage);
+    }
 }
 
-/*public Action RoundStart(Event event, char[] event_name, bool dontBroadcast)
+public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3])
 {
-	if (firstRound > 3)
+	//debug plugin enabled flag
+	//PrintToServer("g_bCvarAllow: %b", g_bCvarAllow);
+	//debug damage
+	//PrintToServer("Vic: %i, Atk: %i, Inf: %i, Dam: %f, DamTyp: %i, Wpn: %i", victim, attacker, inflictor, damage, damagetype, weapon);
+	//attacker and victim survivor checks
+	if (IsValidClientAndInGameAndSurvivor(attacker) && IsValidClientAndInGameAndSurvivor(victim) && victim != attacker)
 	{
-		firstRound = 0;
-	}
-	if (firstRound < 1)
-	{
-		if (GetConVarInt(FFProtection_pCampaign) == 1)
+		if (IsFakeClient(attacker) || IsIncaped(victim))
 		{
-			for (int index; index <= MaxClients; index++)
-			{
-				totalDamage[index] = 0;
-			}
+			//treat friendly-fire from bot attacker normally, which is 0 damage anyway
+			return Plugin_Continue;
 		}
-		firstRound++;
-	}
-}*/
-
-/*public Action RoundEnd(Event event, char[] event_name, bool dontBroadcast)
-{
-	if (GetConVarInt(FFProtection_pRound) == 1)
-	{
-		for (int index; index <= MaxClients;index++)
+		char sInflictorClass[32];
+		if (inflictor > MaxClients)
 		{
-			totalDamage[index] = 0;
+			GetEdictClassname(inflictor, sInflictorClass, sizeof(sInflictorClass));
 		}
-	}
-}*/
-
-public Action PlayerHurt_Action(Event event, const char[] name, bool dontBroadcast)
-{
-	if (GetConVarInt(FFProtection_Enable) != 1)
-	{
-		return Plugin_Continue;
-	}
-
-	int victimUserId = GetClientOfUserId(GetEventInt(event, "userid"));
-	int attackerUserId = GetEventInt(event, "attackerentid");
-	int attackerHealth;
-	int attackerHealthTemp;
-	int attackerHealthTotal;
-	int victimHurt = GetEventInt(event, "dmg_health");
-
-	char WeaponCallBack[32];
-	GetEventString(event, "weapon", WeaponCallBack, 32);
-
-	if ((!IsValidEntity(victimUserId)) || (!IsValidEntity(attackerUserId)))
-	{
-		return Plugin_Continue;
-	}
-	
-	if ((strlen(WeaponCallBack) <= 0) || (attackerUserId == victimUserId) || (GetClientTeam(victimUserId) != GetClientTeam(attackerUserId)) || GetClientTeam(attackerUserId) != 2 || IsIncaped(victimUserId))
-	{
-		return Plugin_Continue;
-	}
-	/*if(IsFakeClient(victimUserId))
-	{
-		PrintToChatAll("\x03 %N \x04damaged \x03 %N \x04for \x03 %d", attackerUserId, victimUserId, victimHurt);
-		return Plugin_Continue;
-	}*/
-	if (StrEqual(WeaponCallBack, "inferno", false) || StrEqual(WeaponCallBack, "pipe_bomb", false) || StrEqual(WeaponCallBack, "fire_cracker_blast", false))
-	{	
-		return Plugin_Continue;
-
-	}
-	if (IsPlayerAlive(victimUserId) && IsClientInGame(victimUserId))
-	{
-		int victimHealth = GetClientHealth(victimUserId);
-		if (GetConVarInt(FFProtection_Heal) == 1)
-		{
-			SetEntityHealth(victimUserId, (victimHealth+victimHurt));
-		}
-	}
-	if (GetConVarInt(FFProtection_Punish) == 1)
-	{
 		
-		if (IsPlayerAlive(attackerUserId) && IsClientInGame(victimUserId))
+		//Banned damages
+		if(IsWeaponGrenadeLauncher(sInflictorClass) || IsWeaponChainsaw(sInflictorClass) || IsWeaponThrowable(sInflictorClass))
 		{
-			//int tellClient = GetClientOfUserId(GetEventInt(event, "attacker"));
-			PrintToChatAll("Attacker Life: %d",GetClientHealth(attackerUserId));
-			PrintToChatAll("\x03 %N \x04damaged \x03 %N \x04for \x03 %d", attackerUserId, victimUserId, victimHurt);
+			return Plugin_Continue;
+		}		
+		//debug weapon
+		//PrintToServer("GL: %b, MG: %b, InfCls: %s, weapon: %i", bWeaponGL, bWeaponMG, sInflictorClass, weapon);
+		//if weapon caused damage
+
+		//apply reverseff_dmgmodifer damage modifier
+		//damage = 1.0;
 		
-			attackerHealth = GetClientHealth(attackerUserId);
-			attackerHealthTemp = GetPlayerTempHealth(attackerUserId);
-			attackerHealthTotal = GetTotalHealth(attackerUserId);
-			
-			if (attackerHealth < victimHurt)
-			{				
-				if(attackerHealthTotal < victimHurt)
-					{
-						if(GetEntProp(attackerUserId, Prop_Send, "m_currentReviveCount") >= GetConVarInt(FindConVar("survivor_max_incapacitated_count")))
-						{
-							ForcePlayerSuicide(attackerUserId);
-						} 
-						else
-						{
-							SetEntPropFloat(attackerUserId, Prop_Send, "m_healthBuffer",0);
-							SetEntityHealth(attackerUserId, 1);
-							SetIncapState(attackerUserId, 1);
-							SetEntityHealth(attackerUserId, 299);
-						} 						
-					}
-					else
-					{
-						if(attackerHealthTemp > victimHurt)
-						{
-							SetEntPropFloat(attackerUserId, Prop_Send, "m_healthBuffer", attackerHealthTemp - victimHurt);
-						} else {
-							SetEntPropFloat(attackerUserId, Prop_Send, "m_healthBuffer",0);
-							SetEntityHealth(attackerUserId, (attackerHealthTotal - victimHurt));
-						}
-					}
-			}
-			else 
+		//pan0s | 20-Apr-2021 | Fixed: Server crashes if reversing chainsaw damage makes the attacker incapacitated or dead.
+		//pan0s | start chainsaw fix part 1
+		/*if (bWeaponChainsaw)
+		{
+			//Create a DataPack to pass to ChainsawTakeDamageTimer.
+			Handle dataPack = CreateDataPack();
+			WritePackCell(dataPack, attacker);
+			WritePackCell(dataPack, inflictor);
+			WritePackCell(dataPack, victim);
+			WritePackFloat(dataPack, damage);
+			WritePackCell(dataPack, damagetype);
+			WritePackCell(dataPack, weapon);
+			for (int i=0; i<3; i++)
 			{
-				SetEntityHealth(attackerUserId, (attackerHealth - victimHurt));
+				WritePackFloat(dataPack, damageForce[i]);
+				WritePackFloat(dataPack, damagePosition[i]);
 			}
+			//adding a timer fixes the bug, reason unknown
+			CreateTimer(0.01, ChainsawTakeDamageTimer, dataPack);
 		}
+		//pan0s | end chainsaw fix part 1
+		*/
+		else
+		{
+			//inflict (non-chainsaw) damage to attacker
+			//add 1HP to victim then damage them for 1HP so the displayed message and vocalization order are correct,
+			//then damage attacker as self-inflicted for actual damage so there is no vocalization, just pain grunt.
+			SetEntityHealth(victim, GetClientHealth(victim) + 1);
+			SDKHooks_TakeDamage(victim, inflictor, attacker, 1.0, 0, weapon, g_fDmgFrc, g_fDmgPos);
+			SDKHooks_TakeDamage(attacker, inflictor, attacker, damage, damagetype, weapon, damageForce, damagePosition);
+		}
+		//no damage for victim
+		return Plugin_Handled;
 	}
+
 	return Plugin_Continue;
+}
+
+stock bool IsValidClientAndInGameAndSurvivor(int client)
+{
+    return (client > 0 && client <= MaxClients && IsClientInGame(client) && GetClientTeam(client) == 2);
+}
+
+stock bool IsWeaponGrenadeLauncher(char[] sInflictorClass)
+{
+	return (StrEqual(sInflictorClass, "grenade_launcher_projectile"));
+}
+
+stock bool IsWeaponMinigun(char[] sInflictorClass)
+{
+	return (StrEqual(sInflictorClass, "prop_minigun") || StrEqual(sInflictorClass, "prop_minigun_l4d1") || StrEqual(sInflictorClass, "prop_mounted_machine_gun"));
+}
+
+stock bool IsWeaponMelee(char[] sInflictorClass)
+{
+	return (StrEqual(sInflictorClass, "weapon_melee"));
+}
+
+stock bool IsWeaponChainsaw(char[] sInflictorClass)
+{
+	return (StrEqual(sInflictorClass, "weapon_chainsaw"));
+}
+
+stock bool IsWeaponThrowable(char[] sInflictorClass)
+{
+	return (StrEqual(sInflictorClass, "inferno") || StrEqual(sInflictorClass, "pipe_bomb") || StrEqual(sInflictorClass, "fire_cracker_blast"));
 }
 
 public Action damageAmount(int client, int args)
@@ -246,21 +236,6 @@ public Action ShowDamageAmount(int client)
 {
 	PrintToChat(client, "\x04Friendly-Fire This Round: \x03 %d",totalDamage[client]);
 	return Plugin_Handled;
-}
-
-public Action forgiveAll(int client, int args)
-{
-	for (int index; index < MaxClients; index++)
-	{
-		totalDamage[index] = 0;
-	}
-	PrintToChatAll("\x04Friendly-Fire Calculations Reset \x03for all clients.");
-}
-
-public Action forgiveMe(int client, int args)
-{
-	totalDamage[client] = 0;
-	PrintToChat(client, "\x04Friendly-Fire Calculations Reset \x03for %d");
 }
 
 stock void SetIncapState(int client, int isIncapacitated)
