@@ -410,16 +410,19 @@ stock bool LeftStartArea()
 
 void SetThePrez(int client)
 {	
+	float new_prezSpeedRatio;
+	new_prezSpeedRatio = 1.15; //Prez speed nerf 
 	if(isAllow){
 		ResetAll();
 		prevPrez[client] = true;
 		thePrez = client;
 		SetClientColors(thePrez, GetClientHealth(thePrez));
 		SDKHook(client, SDKHook_WeaponCanUse, OnWeaponCanUse);
-		StripWeapons(thePrez);
-		if (!GetConVarBool(prezCanHeal)) { RemoveItemFromSlot(thePrez, WEP_SLOT_HEALTH); }
-		GiveHandgun(client, GetConVarBool(prezAllowMagnum)); 
-		SetEntDataFloat(thePrez, movementOffset, GetConVarFloat(prezSpeedRatio), true);
+		//StripWeapons(thePrez);
+		//if (!GetConVarBool(prezCanHeal)) { RemoveItemFromSlot(thePrez, WEP_SLOT_HEALTH); }
+		//GiveHandgun(client, GetConVarBool(prezAllowMagnum)); 
+		//SetEntDataFloat(thePrez, movementOffset, GetConVarFloat(prezSpeedRatio), true);
+		SetEntDataFloat(thePrez, movementOffset, new_prezSpeedRatio, true);
 		
 		PrintHintTextToAll("The President \x05%N\x01 has been selected to serve. \n Survivors must protect him, his damage is their damage.", thePrez);	
 	}	
