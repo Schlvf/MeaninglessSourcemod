@@ -345,6 +345,7 @@ void Enable()
 	HookEvent("player_no_longer_it", Event_PlayerNoLongerBoomed);
 	HookEvent("player_team", Event_PlayerTeam);
 	HookEvent("heal_begin",Event_heal_begin);
+	HookEvent("weapon_fire",Event_weapon_fire);
 }
 
 void Disable()
@@ -358,6 +359,7 @@ void Disable()
 	UnhookEvent("player_no_longer_it", Event_PlayerNoLongerBoomed);
 	UnhookEvent("player_team", Event_PlayerTeam);
 	UnhookEvent("heal_begin",Event_heal_begin);
+	UnhookEvent("weapon_fire",Event_weapon_fire);
 }
 
 public void Event_RoundStart(Event event, char[] event_name, bool dontBroadcast)
@@ -560,6 +562,27 @@ public Action Event_heal_begin(Event event, const char[] name, bool dontBroadcas
 		PrintToChatAll("\x03The president can't heal anybody");
 		return Plugin_Handled;
 	}
+	return Plugin_Continue;
+}
+
+public Action Event_weapon_fire(Event event, const char[] name, bool dontBroadcast)
+{	
+	int tmp = GetClientOfUserId(GetEventInt(event, "userid"));
+	PrintToChatAll("\x03 %i fired", tmp);
+	
+	/*if (tmp == thePrez)
+	{	int index = CreateEntityByName("weapon_first_aid_kit");
+		float origin[3];
+		GetEntPropVector(tmp, Prop_Send, "m_vecOrigin", origin);
+		origin[2]+=20;
+		TeleportEntity(index, origin, NULL_VECTOR, NULL_VECTOR);
+		DispatchSpawn(index);
+		ActivateEntity(index);
+		RemovePlayerItem(tmp, GetPlayerWeaponSlot(tmp, 3));
+		PrintToChatAll("\x03The president can't heal anybody");
+		return Plugin_Handled;
+	}
+	*/
 	return Plugin_Continue;
 }
 
