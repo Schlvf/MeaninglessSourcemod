@@ -183,16 +183,18 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 		*/
 		else
 		{
-			if(GetClientHealth(victim) == 1)
+			PrintToChatAll("\x03 %N \x04damaged \x03 %N \x04for \x03 %i", attacker, victim, damage);
+			if(GetClientHealth(victim) != 1)
 			{
-				SetIncapState(victim, 0);
-				SetEntityHealth(victim, 1);
+				//SetIncapState(victim, 0);
+				//SetEntityHealth(victim, 1);
+				SetEntityHealth(victim, GetClientHealth(victim) + 1);
+				SDKHooks_TakeDamage(victim, inflictor, attacker, 1.0, 0, weapon, g_fDmgFrc, g_fDmgPos);
 			}
 			else
 			{
-				SetEntityHealth(victim, GetClientHealth(victim) + 1);
-				SDKHooks_TakeDamage(victim, inflictor, attacker, 1.0, 0, weapon, g_fDmgFrc, g_fDmgPos);
-			}			
+				//SetEntityHealth(victim, 1);
+			}
 			SDKHooks_TakeDamage(attacker, inflictor, attacker, damage, damagetype, weapon, damageForce, damagePosition);
 		}
 		//no damage for victim
