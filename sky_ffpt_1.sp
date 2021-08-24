@@ -132,7 +132,7 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 	//PrintToServer("g_bCvarAllow: %b", g_bCvarAllow);
 	//debug damage
 	//PrintToServer("Vic: %i, Atk: %i, Inf: %i, Dam: %f, DamTyp: %i, Wpn: %i", victim, attacker, inflictor, damage, damagetype, weapon);
-	PrintToChatAll("\x03 %N \x04damaged \x03 %N \x04for \x03 %f", attacker, victim, damage);
+	//PrintToChatAll("\x03 %N \x04damaged \x03 %N \x04for \x03 %f", attacker, victim, damage);
 	//attacker and victim survivor checks
 	if (IsValidClientAndInGameAndSurvivor(attacker) && IsValidClientAndInGameAndSurvivor(victim) && victim != attacker)
 	{
