@@ -136,9 +136,16 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 	//attacker and victim survivor checks
 	if (IsValidClientAndInGameAndSurvivor(attacker) && IsValidClientAndInGameAndSurvivor(victim) && victim != attacker)
 	{
-		if (IsFakeClient(attacker) || IsFakeClient(victim) || IsIncaped(victim))
+		int rDamage;
+		rDamage = RoundToCeil(damage); 
+		if (IsFakeClient(attacker) || IsIncaped(victim))
 		{
 			//treat friendly-fire from bot attacker normally, which is 0 damage anyway
+			return Plugin_Continue;
+		}
+		if (IsFakeClient(victim))
+		{
+			PrintToChatAll("\x03 %N \x04damaged \x03 %N \x04for \x03 %d", attacker, victim, rDamage);
 			return Plugin_Continue;
 		}
 		char sInflictorClass[32];
@@ -183,17 +190,13 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 		*/
 		else
 		{
-			PrintToChatAll("\x03 %N \x04damaged \x03 %N \x04for \x03 %d", attacker, victim, damage);
+			PrintToChatAll("\x03 %N \x04damaged \x03 %N \x04for \x03 %d", attacker, victim, rDamage);
 			if(GetClientHealth(victim) != 1)
 			{
 				//SetIncapState(victim, 0);
 				//SetEntityHealth(victim, 1);
 				SetEntityHealth(victim, GetClientHealth(victim) + 1);
 				SDKHooks_TakeDamage(victim, inflictor, attacker, 1.0, 0, weapon, g_fDmgFrc, g_fDmgPos);
-			}
-			else
-			{
-				//SetEntityHealth(victim, 1);
 			}
 			SDKHooks_TakeDamage(attacker, inflictor, attacker, damage, damagetype, weapon, damageForce, damagePosition);
 		}
