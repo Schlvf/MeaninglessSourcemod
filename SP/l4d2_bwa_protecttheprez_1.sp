@@ -600,7 +600,7 @@ public int GetCurrentWeaponSlot(int client)
 		slot=3;
 	else if (StrEqual(weapon, "weapon_pain_pills") || StrEqual(weapon, "weapon_adrenaline"))
 		slot=4;
-
+	PrintToChatAll("\x03 Slot %i",slot);
 	return slot;
 }
 
@@ -612,9 +612,10 @@ public Action Event_weapon_fire(Event event, const char[] name, bool dontBroadca
 	{	
 		if (GetCurrentWeaponSlot(tmp) == 1){
 			DropSlot_l4d2(tmp, 1, false);
+			PrintToChatAll("\x03The president can't use primary weapons");
 		}
 
-		PrintToChatAll("\x03The president can't use primary weapons");
+		//PrintToChatAll("\x03The president can't use primary weapons");
 		return Plugin_Handled;
 	}
 	
