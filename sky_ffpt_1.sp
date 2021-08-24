@@ -132,10 +132,11 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 	//PrintToServer("g_bCvarAllow: %b", g_bCvarAllow);
 	//debug damage
 	//PrintToServer("Vic: %i, Atk: %i, Inf: %i, Dam: %f, DamTyp: %i, Wpn: %i", victim, attacker, inflictor, damage, damagetype, weapon);
+	PrintToChatAll("\x03 %N \x04damaged \x03 %N \x04for \x03 %d", attacker, victim, damage);
 	//attacker and victim survivor checks
 	if (IsValidClientAndInGameAndSurvivor(attacker) && IsValidClientAndInGameAndSurvivor(victim) && victim != attacker)
 	{
-		if (IsFakeClient(attacker) || IsIncaped(victim))
+		if (IsFakeClient(attacker) || IsFakeClient(victim) || IsIncaped(victim)) 
 		{
 			//treat friendly-fire from bot attacker normally, which is 0 damage anyway
 			return Plugin_Continue;
