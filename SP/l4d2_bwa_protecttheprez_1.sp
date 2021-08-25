@@ -1137,6 +1137,7 @@ public void DropSlot_l4d2(int client,int slot, bool drop, char[] weapon)
 			return;
 		}
 		*/
+		RemoveItemFromSlot(client, WEP_SLOT_PRIMARY);
 		int index = CreateEntityByName(sWeapon);
 		float cllocation[3];
 		GetEntPropVector(client, Prop_Send, "m_vecOrigin", cllocation);
