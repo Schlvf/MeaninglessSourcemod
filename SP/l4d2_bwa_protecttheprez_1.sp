@@ -599,7 +599,7 @@ public int GetCurrentWeaponSlot(int client, char[] weapon)
 		slot=3;
 	else if (StrEqual(weapon, "pain_pills") || StrEqual(weapon, "adrenaline"))
 		slot=4;
-	PrintToChatAll("\x03 Slot %i",slot);
+	//PrintToChatAll("\x03 Slot %i",slot);
 	return slot;
 }
 
@@ -611,7 +611,7 @@ public Action Event_weapon_fire(Event event, const char[] name, bool dontBroadca
 		char weapon[32];
 		GetEventString(event, "weapon", weapon, 32);
 		if (GetCurrentWeaponSlot(tmp,weapon) == 0){
-			PrintToChatAll("%s",weapon);
+			//PrintToChatAll("%s",weapon);
 			DropSlot_l4d2(tmp, 0, false, weapon);
 			PrintToChatAll("\x03The president can't use primary weapons");
 		}
@@ -1085,7 +1085,7 @@ public void DropSlot_l4d2(int client,int slot, bool drop, char[] weapon)
 		int ammoOffset = FindSendPropInfo("CTerrorPlayer", "m_iAmmo");
 		GetEdictClassname(GetPlayerWeaponSlot(client, slot), sWeapon, 32);
 
-		PrintToChatAll(" weapon edict class %s", sWeapon);
+		//PrintToChatAll("weapon edict class %s", sWeapon);
 		if (slot == 0)
 		{
 			clip = GetEntProp(GetPlayerWeaponSlot(client, 0), Prop_Send, "m_iClip1");
