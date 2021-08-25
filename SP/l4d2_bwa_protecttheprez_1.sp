@@ -40,6 +40,9 @@ const int WEP_SLOT_HEALTH = 3;
 
 #define PLUGIN_VERSION "1.0.4"
 
+#define FL_PISTOL_PRIMARY (1<<6) //Is 1 when you have a primary weapon and dual pistols
+#define FL_PISTOL (1<<7) //Is 1 when you have dual pistols
+
 public Plugin myinfo =
 {
 	name        = "L4D2 -=BwA=- Protect The President",
@@ -1074,202 +1077,77 @@ void UnlockDoor(int door)
 
 void DropSlot_l4d2(int client,int slot, bool drop=false, char[] weapon)
 {
-	int oldweapon;
-	oldweapon=GetPlayerWeaponSlot(client, slot);
-	//oldweapon=slot;
-	if (oldweapon > 0)
+	if (GetPlayerWeaponSlot(client, slot) > 0)
 	{
-		//char weapon[32];
+		char sWeapon[32];
 		int ammo;
 		int clip;
-		int upgrade;
-		int upammo;
 		int ammoOffset = FindSendPropInfo("CTerrorPlayer", "m_iAmmo");
-		GetEdictClassname(oldweapon, weapon, 32);
+		GetEdictClassname(GetPlayerWeaponSlot(client, slot), sWeapon, 32);
 
-		PrintToChatAll("weapon edict class name %d", weapon);
-
-		return;
-
+		PrintToChatAll(" weapon edict class %d", sWeapon);
 		if (slot == 0)
 		{
-			clip = GetEntProp(oldweapon, Prop_Send, "m_iClip1");
-			upgrade = GetEntProp(oldweapon, Prop_Send, "m_upgradeBitVec");
-			upammo = GetEntProp(oldweapon, Prop_Send, "m_nUpgradedPrimaryAmmoLoaded");
-			if (StrEqual(weapon, "rifle") || StrEqual(weapon, "rifle_sg552") || StrEqual(weapon, "rifle_desert") || StrEqual(weapon, "rifle_ak47"))
+			clip = GetEntProp(GetPlayerWeaponSlot(client, 0), Prop_Send, "m_iClip1");
+			if (StrEqual(sWeapon, "weapon_pumpshotgun") || StrEqual(sWeapon, "weapon_autoshotgun") || StrEqual(sWeapon, "weapon_shotgun_chrome") || StrEqual(sWeapon, "weapon_shotgun_spas"))
 			{
-				ammo = GetEntData(client, ammoOffset+(12));
-				SetEntData(client, ammoOffset+(12), 0);
+				ammo = GetEntData(client, ammoOffset+(6*4));
+				SetEntData(client, ammoOffset+(6*4), 0);
 			}
-			else if (StrEqual(weapon, "smg") || StrEqual(weapon, "smg_silenced") || StrEqual(weapon, "smg_mp5"))
+			else if (StrEqual(sWeapon, "weapon_smg") || StrEqual(sWeapon, "weapon_smg_silenced") || StrEqual(sWeapon, "weapon_smg_mp5"))
 			{
-				ammo = GetEntData(client, ammoOffset+(20));
-				SetEntData(client, ammoOffset+(20), 0);
+				ammo = GetEntData(client, ammoOffset+(5*4));
+				SetEntData(client, ammoOffset+(5*4), 0);
 			}
-			else if (StrEqual(weapon, "pumpshotgun") || StrEqual(weapon, "shotgun_chrome"))
+			//else if (StrEqual(sWeapon, "weapon_rifle"))
+			else if (StrEqual(sWeapon, "weapon_rifle_m60") || StrEqual(sWeapon, "weapon_rifle") || StrEqual(sWeapon, "weapon_rifle_ak47") || StrEqual(sWeapon, "weapon_rifle_desert") || StrEqual(sWeapon, "weapon_rifle_sg552") )
 			{
-				ammo = GetEntData(client, ammoOffset+(28));
-				SetEntData(client, ammoOffset+(28), 0);
+				ammo = GetEntData(client, ammoOffset+(3*4));
+				SetEntData(client, ammoOffset+(3*4), 0);
 			}
-			else if (StrEqual(weapon, "autoshotgun") || StrEqual(weapon, "shotgun_spas"))
+			else if (StrEqual(sWeapon, "weapon_hunting_rifle")|| StrEqual(sWeapon, "weapon_sniper_military") || StrEqual(sWeapon, "weapon_sniper_awp") || StrEqual(sWeapon, "weapon_sniper_scout"))
 			{
-				ammo = GetEntData(client, ammoOffset+(32));
-				SetEntData(client, ammoOffset+(32), 0);
+				ammo = GetEntData(client, ammoOffset+(2*4));
+				SetEntData(client, ammoOffset+(2*4), 0);
 			}
-			else if (StrEqual(weapon, "hunting_rifle"))
-			{
-				ammo = GetEntData(client, ammoOffset+(36));
-				SetEntData(client, ammoOffset+(36), 0);
-			}
-			else if (StrEqual(weapon, "sniper_scout") || StrEqual(weapon, "sniper_military") || StrEqual(weapon, "sniper_awp"))
-			{
-				ammo = GetEntData(client, ammoOffset+(40));
-				SetEntData(client, ammoOffset+(40), 0);
-			}
-			else if (StrEqual(weapon, "grenade_launcher"))
-			{
-				ammo = GetEntData(client, ammoOffset+(68));
-				SetEntData(client, ammoOffset+(68), 0);
-			}
-			else return;
 		}
-		int index = CreateEntityByName(weapon); 
-		//index=oldweapon;
-		bool dual=false;
 		if (slot == 1)
 		{
-			if (StrEqual(weapon, "melee"))
+			if ((GetEntProp(client, Prop_Send, "m_iAddonBits") & (FL_PISTOL|FL_PISTOL_PRIMARY)) > 0)
 			{
-				char item[150];
-				GetEntPropString(oldweapon , Prop_Data, "m_ModelName", item, sizeof(item));
-				//PrintToChat(client, "%s", item);
-				if (StrEqual(item, MODEL_V_FIREAXE))
-				{
-					//DispatchKeyValue(index, "model", MODEL_V_FIREAXE);
-					DispatchKeyValue(index, "melee_script_name", "fireaxe");
-				}
-				else if (StrEqual(item, MODEL_V_FRYING_PAN))
-				{
-					//DispatchKeyValue(index, "model", MODEL_V_FRYING_PAN);
-					DispatchKeyValue(index, "melee_script_name", "frying_pan");
-				}
-				else if (StrEqual(item, MODEL_V_MACHETE))
-				{
-					//DispatchKeyValue(index, "model", MODEL_V_MACHETE);
-					DispatchKeyValue(index, "melee_script_name", "machete");
-				}
-				else if (StrEqual(item, MODEL_V_BASEBALL_BAT))
-				{
-					//DispatchKeyValue(index, "model", MODEL_V_BASEBALL_BAT);
-					DispatchKeyValue(index, "melee_script_name", "baseball_bat");
-				}
-				else if (StrEqual(item, MODEL_V_CROWBAR))
-				{
-					//DispatchKeyValue(index, "model", MODEL_V_CROWBAR);
-					DispatchKeyValue(index, "melee_script_name", "crowbar");
-				}
-				else if (StrEqual(item, MODEL_V_CRICKET_BAT))
-				{
-					//DispatchKeyValue(index, "model", MODEL_V_CRICKET_BAT);
-					DispatchKeyValue(index, "melee_script_name", "cricket_bat");
-				}
-				else if (StrEqual(item, MODEL_V_TONFA))
-				{
-					//DispatchKeyValue(index, "model", MODEL_V_TONFA);
-					DispatchKeyValue(index, "melee_script_name", "tonfa");
-				}
-				else if (StrEqual(item, MODEL_V_KATANA))
-				{
-					//DispatchKeyValue(index, "model", MODEL_V_KATANA);
-					DispatchKeyValue(index, "melee_script_name", "katana");
-				}
-				else if (StrEqual(item, MODEL_V_ELECTRIC_GUITAR))
-				{
-					//DispatchKeyValue(index, "model", MODEL_V_ELECTRIC_GUITAR);
-					DispatchKeyValue(index, "melee_script_name", "electric_guitar");
-				}
-				else if (StrEqual(item, MODEL_V_GOLFCLUB))
-				{
-					//DispatchKeyValue(index, "model", MODEL_V_GOLFCLUB);
-					DispatchKeyValue(index, "melee_script_name", "golfclub");
-				}
-				else if (StrEqual(item, MODEL_V_SHIELD))
-				{
-					//DispatchKeyValue(index, "model", MODEL_V_GOLFCLUB);
-					DispatchKeyValue(index, "melee_script_name", "riotshield");
-				}
-				else if (StrEqual(item, MODEL_V_KNIFE))
-				{
-					//DispatchKeyValue(index, "model", MODEL_V_GOLFCLUB);
-					DispatchKeyValue(index, "melee_script_name", "knife");
-				}
-
-				// Supongamos
-
-				else if (StrEqual(item, MODEL_V_SHOVEL))
-				{
-					//DispatchKeyValue(index, "model", MODEL_V_GOLFCLUB);
-					DispatchKeyValue(index, "melee_script_name", "shovel");
-				}
-				else if (StrEqual(item, MODEL_V_PITCHFORK))
-				{
-					//DispatchKeyValue(index, "model", MODEL_V_GOLFCLUB);
-					DispatchKeyValue(index, "melee_script_name", "pitchfork");
-				}
-				else return;
+				clip = GetEntProp(GetPlayerWeaponSlot(client, 1), Prop_Send, "m_iClip1");
+				RemovePlayerItem(client, GetPlayerWeaponSlot(client, 1));
+				SetCommandFlags("give", GetCommandFlags("give") & ~FCVAR_CHEAT);
+				FakeClientCommand(client, "give pistol", sWeapon);
+				SetCommandFlags("give", GetCommandFlags("give") | FCVAR_CHEAT);
+				if (clip < 15)
+					SetEntProp(GetPlayerWeaponSlot(client, 1), Prop_Send, "m_iClip1", 0);
+				else
+					SetEntProp(GetPlayerWeaponSlot(client, 1), Prop_Send, "m_iClip1", clip-15);
+				int index = CreateEntityByName(sWeapon);
+				float cllocation[3];
+				GetEntPropVector(client, Prop_Send, "m_vecOrigin", cllocation);
+				cllocation[2]+=20;
+				TeleportEntity(index,cllocation, NULL_VECTOR, NULL_VECTOR);
+				DispatchSpawn(index);
+				ActivateEntity(index);
 			}
-			else if (StrEqual(weapon, "chainsaw"))
-			{
-				clip = GetEntProp(oldweapon, Prop_Send, "m_iClip1");
-			}
-			else if (StrEqual(weapon, "pistol"))
-			{
-				clip = GetEntProp(oldweapon, Prop_Send, "m_iClip1");
-				dual = GetEntProp(oldweapon, Prop_Send, "m_hasDualWeapons"); 
-				if(dual)clip=0;
-			}
-			else if (StrEqual(weapon, "pistol_magnum"))
-			{
-				clip = GetEntProp(oldweapon, Prop_Send, "m_iClip1");
-			}
-			else return;
+			else
+				ReplyToCommand(client, "[SM] You can't drop your only pistol!");
+			return;
 		}
-		
-		RemovePlayerItem(client, oldweapon);
-		
-		float origin[3];
-		float ang[3];
-		GetClientEyePosition(client,origin);
-		GetClientEyeAngles(client, ang);
-		GetAngleVectors(ang, ang, NULL_VECTOR,NULL_VECTOR);
-		NormalizeVector(ang,ang);
-		if(drop)ScaleVector(ang, 500.0);
-		else ScaleVector(ang, 300.0);
-		
+		int index = CreateEntityByName(sWeapon);
+		float cllocation[3];
+		GetEntPropVector(client, Prop_Send, "m_vecOrigin", cllocation);
+		cllocation[2]+=20;
+		TeleportEntity(index,cllocation, NULL_VECTOR, NULL_VECTOR);
 		DispatchSpawn(index);
-		TeleportEntity(index, origin, NULL_VECTOR, ang);
-		ActivateEntity(index); 
-
+		ActivateEntity(index);
+		RemovePlayerItem(client, GetPlayerWeaponSlot(client, slot));
 		if (slot == 0)
 		{
 			SetEntProp(index, Prop_Send, "m_iExtraPrimaryAmmo", ammo);
 			SetEntProp(index, Prop_Send, "m_iClip1", clip);
-			SetEntProp(index, Prop_Send, "m_upgradeBitVec", upgrade);
-			SetEntProp(index, Prop_Send, "m_nUpgradedPrimaryAmmoLoaded", upammo);
-		}
-
-		if (slot == 1)
-		{
-			if (StrEqual(weapon, "chainsaw") || StrEqual(weapon, "pistol"))
-			{
-				SetEntProp(index, Prop_Send, "m_iClip1", clip);
-			}
-			if(dual)
-			{
-				SetCommandFlags("give", GetCommandFlags("give") & ~FCVAR_CHEAT);
-				FakeClientCommand(client, "give pistol");
-				SetCommandFlags("give", GetCommandFlags("give") | FCVAR_CHEAT);
-			}
 		}
 	}
 }
