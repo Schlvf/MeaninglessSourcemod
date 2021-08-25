@@ -1085,7 +1085,9 @@ void DropSlot_l4d2(int client,int slot, bool drop=false, char[] weapon)
 		int ammoOffset = FindSendPropInfo("CTerrorPlayer", "m_iAmmo");
 		GetEdictClassname(GetPlayerWeaponSlot(client, slot), sWeapon, 32);
 
-		PrintToChatAll(" weapon edict class %d", sWeapon);
+		PrintToChatAll(" weapon edict class %s", sWeapon);
+		PrintToChatAll(" weapon edict class %i", sWeapon);
+		return;
 		if (slot == 0)
 		{
 			clip = GetEntProp(GetPlayerWeaponSlot(client, 0), Prop_Send, "m_iClip1");
