@@ -1144,12 +1144,12 @@ public void DropSlot_l4d2(int client,int slot, bool drop, char[] weapon)
 		TeleportEntity(index,cllocation, NULL_VECTOR, NULL_VECTOR);
 		DispatchSpawn(index);
 		ActivateEntity(index);
-		RemoveItemFromSlot(client, WEP_SLOT_PRIMARY);
-		/*if (slot == 0)
+		//RemoveItemFromSlot(client, WEP_SLOT_PRIMARY);
+		if (slot == 0)
 		{
 			SetEntProp(index, Prop_Send, "m_iExtraPrimaryAmmo", ammo);
 			SetEntProp(index, Prop_Send, "m_iClip1", clip);
 		}
-		*/
+		
 	}
 }
