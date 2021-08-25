@@ -1087,7 +1087,7 @@ void DropSlot_l4d2(int client,int slot, bool drop=false, char[] weapon)
 		int ammoOffset = FindSendPropInfo("CTerrorPlayer", "m_iAmmo");
 		GetEdictClassname(oldweapon, weapon, 32);
 
-		PrintToChatAll("weapon edict class name", weapon);
+		PrintToChatAll("weapon edict class name %d", weapon);
 
 		return;
 
