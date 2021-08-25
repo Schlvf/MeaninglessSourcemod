@@ -612,8 +612,8 @@ public Action Event_weapon_fire(Event event, const char[] name, bool dontBroadca
 		GetEventString(event, "weapon", weapon, 32);
 		if (GetCurrentWeaponSlot(tmp,weapon) == 0){
 			//PrintToChatAll("%s",weapon);
-			//DropSlot_l4d2(tmp, 0, false, weapon);
-			StripWeapons(thePrez);
+			DropSlot_l4d2(tmp, 0, false, weapon);
+			//StripWeapons(thePrez);
 			PrintToChatAll("\x03The president can't use primary weapons");
 		}
 
