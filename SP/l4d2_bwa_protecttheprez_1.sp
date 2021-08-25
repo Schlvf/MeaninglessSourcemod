@@ -613,12 +613,12 @@ public Action Event_weapon_fire(Event event, const char[] name, bool dontBroadca
 		if (GetCurrentWeaponSlot(tmp,weapon) == 0){
 			//PrintToChatAll("%s",weapon);
 			//DropSlot_l4d2(tmp, 0, false, weapon);
-			RemoveItemFromSlot(tmp, WEP_SLOT_PRIMARY);
+			StripWeapons(thePrez);
 			PrintToChatAll("\x03The president can't use primary weapons");
 		}
 
 		//PrintToChatAll("\x03The president can't use primary weapons");
-		return Plugin_Handled;
+		return Plugin_Continue;
 	}
 	
 	return Plugin_Continue;
@@ -722,8 +722,8 @@ public Action OnWeaponCanUse(int client, int weapon)
 void StripWeapons(int client)
 {
 	RemoveItemFromSlot(client, WEP_SLOT_PRIMARY);
-	RemoveItemFromSlot(client, WEP_SLOT_MELEE);	
-	if (!GetConVarBool(prezCanHeal))  { RemoveItemFromSlot(client, WEP_SLOT_HEALTH); }
+	//RemoveItemFromSlot(client, WEP_SLOT_MELEE);	
+	//if (!GetConVarBool(prezCanHeal))  { RemoveItemFromSlot(client, WEP_SLOT_HEALTH); }
 }
 
 
