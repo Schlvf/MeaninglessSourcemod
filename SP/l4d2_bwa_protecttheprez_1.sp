@@ -1086,8 +1086,6 @@ void DropSlot_l4d2(int client,int slot, bool drop=false, char[] weapon)
 		GetEdictClassname(GetPlayerWeaponSlot(client, slot), sWeapon, 32);
 
 		PrintToChatAll(" weapon edict class %s", sWeapon);
-		PrintToChatAll(" weapon edict class %i", sWeapon);
-		return;
 		if (slot == 0)
 		{
 			clip = GetEntProp(GetPlayerWeaponSlot(client, 0), Prop_Send, "m_iClip1");
@@ -1113,7 +1111,7 @@ void DropSlot_l4d2(int client,int slot, bool drop=false, char[] weapon)
 				SetEntData(client, ammoOffset+(2*4), 0);
 			}
 		}
-		if (slot == 1)
+		/*if (slot == 1)
 		{
 			if ((GetEntProp(client, Prop_Send, "m_iAddonBits") & (FL_PISTOL|FL_PISTOL_PRIMARY)) > 0)
 			{
@@ -1138,6 +1136,7 @@ void DropSlot_l4d2(int client,int slot, bool drop=false, char[] weapon)
 				ReplyToCommand(client, "[SM] You can't drop your only pistol!");
 			return;
 		}
+		*/
 		int index = CreateEntityByName(sWeapon);
 		float cllocation[3];
 		GetEntPropVector(client, Prop_Send, "m_vecOrigin", cllocation);
@@ -1145,11 +1144,13 @@ void DropSlot_l4d2(int client,int slot, bool drop=false, char[] weapon)
 		TeleportEntity(index,cllocation, NULL_VECTOR, NULL_VECTOR);
 		DispatchSpawn(index);
 		ActivateEntity(index);
-		RemovePlayerItem(client, GetPlayerWeaponSlot(client, slot));
+		/*RemovePlayerItem(client, GetPlayerWeaponSlot(client, slot));
 		if (slot == 0)
 		{
 			SetEntProp(index, Prop_Send, "m_iExtraPrimaryAmmo", ammo);
 			SetEntProp(index, Prop_Send, "m_iClip1", clip);
 		}
+		*/
+		return;
 	}
 }
