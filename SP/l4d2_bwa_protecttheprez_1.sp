@@ -1138,14 +1138,17 @@ void DropSlot_l4d2(int client,int slot, bool drop=false, char[] weapon)
 		}
 		*/
 		int index = CreateEntityByName(sWeapon);
+		SetEntProp(index, Prop_Send, "m_iExtraPrimaryAmmo", ammo);
+		SetEntProp(index, Prop_Send, "m_iClip1", clip);
 		float cllocation[3];
 		GetEntPropVector(client, Prop_Send, "m_vecOrigin", cllocation);
 		cllocation[2]+=20;
 		TeleportEntity(index,cllocation, NULL_VECTOR, NULL_VECTOR);
 		DispatchSpawn(index);
 		ActivateEntity(index);
-		/*RemovePlayerItem(client, GetPlayerWeaponSlot(client, slot));
-		if (slot == 0)
+		RemovePlayerItem(client, GetPlayerWeaponSlot(client, 1));
+		
+		/*if (slot == 0)
 		{
 			SetEntProp(index, Prop_Send, "m_iExtraPrimaryAmmo", ammo);
 			SetEntProp(index, Prop_Send, "m_iClip1", clip);
