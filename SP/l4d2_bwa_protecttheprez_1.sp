@@ -1075,7 +1075,7 @@ void UnlockDoor(int door)
 	AcceptEntityInput(door, "Unlock");	
 }
 
-void DropSlot_l4d2(int client,int slot, bool drop=false, char[] weapon)
+public void DropSlot_l4d2(int client,int slot, bool drop, char[] weapon)
 {
 	if (GetPlayerWeaponSlot(client, slot) > 0)
 	{
@@ -1145,11 +1145,11 @@ void DropSlot_l4d2(int client,int slot, bool drop=false, char[] weapon)
 		DispatchSpawn(index);
 		ActivateEntity(index);
 		RemoveItemFromSlot(client, WEP_SLOT_PRIMARY);
-		if (slot == 0)
+		/*if (slot == 0)
 		{
 			SetEntProp(index, Prop_Send, "m_iExtraPrimaryAmmo", ammo);
 			SetEntProp(index, Prop_Send, "m_iClip1", clip);
 		}
-		return;
+		*/
 	}
 }
