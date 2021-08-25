@@ -1145,12 +1145,11 @@ void DropSlot_l4d2(int client,int slot, bool drop=false, char[] weapon)
 		DispatchSpawn(index);
 		ActivateEntity(index);
 		RemovePlayerItem(client, GetPlayerWeaponSlot(client, 0));
-		
+		return;
 		if (slot == 0)
 		{
 			SetEntProp(index, Prop_Send, "m_iExtraPrimaryAmmo", ammo);
 			SetEntProp(index, Prop_Send, "m_iClip1", clip);
 		}
-		return;
 	}
 }
