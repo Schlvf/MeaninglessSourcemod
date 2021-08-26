@@ -365,7 +365,7 @@ void Enable()
 	HookEvent("player_no_longer_it", Event_PlayerNoLongerBoomed);
 	HookEvent("player_team", Event_PlayerTeam);
 	HookEvent("heal_begin",Event_heal_begin);
-	HookEvent("weapon_fire",Event_weapon_fire);
+	//HookEvent("weapon_fire",Event_weapon_fire);
 }
 
 void Disable()
@@ -379,7 +379,7 @@ void Disable()
 	UnhookEvent("player_no_longer_it", Event_PlayerNoLongerBoomed);
 	UnhookEvent("player_team", Event_PlayerTeam);
 	UnhookEvent("heal_begin",Event_heal_begin);
-	UnhookEvent("weapon_fire",Event_weapon_fire);
+	//UnhookEvent("weapon_fire",Event_weapon_fire);
 }
 
 public void Event_RoundStart(Event event, char[] event_name, bool dontBroadcast)
@@ -433,13 +433,13 @@ stock bool LeftStartArea()
 void SetThePrez(int client)
 {	
 	float new_prezSpeedRatio;
-	new_prezSpeedRatio = 1.15; //Prez speed nerf 
+	new_prezSpeedRatio = 0.85; //Prez speed nerf 
 	if(isAllow){
 		ResetAll();
 		prevPrez[client] = true;
 		thePrez = client;
 		SetClientColors(thePrez, GetClientHealth(thePrez));
-		//SDKHook(client, SDKHook_WeaponCanUse, OnWeaponCanUse);
+		SDKHook(client, SDKHook_WeaponCanUse, OnWeaponCanUse);
 		//StripWeapons(thePrez);
 		//if (!GetConVarBool(prezCanHeal)) { RemoveItemFromSlot(thePrez, WEP_SLOT_HEALTH); }
 		//GiveHandgun(client, GetConVarBool(prezAllowMagnum)); 
@@ -603,6 +603,7 @@ public int GetCurrentWeaponSlot(int client, char[] weapon)
 	return slot;
 }
 
+/*
 public Action Event_weapon_fire(Event event, const char[] name, bool dontBroadcast)
 {	
 	int tmp = GetClientOfUserId(GetEventInt(event, "userid"));
@@ -623,7 +624,7 @@ public Action Event_weapon_fire(Event event, const char[] name, bool dontBroadca
 	
 	return Plugin_Continue;
 }
-
+*/
 public Action OnWeaponCanUse(int client, int weapon)
 {
 	if (client != thePrez) { return Plugin_Continue; }
@@ -709,11 +710,40 @@ public Action OnWeaponCanUse(int client, int weapon)
 			return Plugin_Continue;
 		}
 
+		//T1
+		else if (StrEqual("weapon_pumpshotgun", wepclassname, false))
+		{
+			return Plugin_Continue;
+		}
+		else if (StrEqual("weapon_smg", wepclassname, false))
+		{
+			return Plugin_Continue;
+		}
+		else if (StrEqual("weapon_hunting_rifle", wepclassname, false))
+		{
+			return Plugin_Continue;
+		}
+		else if (StrEqual("weapon_smg_silenced", wepclassname, false))
+		{
+			return Plugin_Continue;
+		}
+		else if (StrEqual("weapon_smg_mp5", wepclassname, false))
+		{
+			return Plugin_Continue;
+		}
+		else if (StrEqual("weapon_shotgun_chrome", wepclassname, false))
+		{
+			return Plugin_Continue;
+		}
+		else if (StrEqual("weapon_sniper_scout", wepclassname, false))
+		{
+			return Plugin_Continue;
+		}
 		else if (StrEqual("weapon_melee", wepclassname, false))
 		{
 			return Plugin_Continue;
 		} else {
-			PrintToChatAll("\x03The president \x04can't \x03pick up this item \x04!!!");
+			PrintToChatAll("\x03The president \x04can't \x03use T2 weapons\x04!!!");
 		}
 	}
 	return Plugin_Handled;
@@ -871,7 +901,14 @@ void DamageTeam(int damage, int exception)
 			if (!IsIncapped(i) && !IsHangingFromLedge(i))
 			{
 				health = GetSurvivorPermanentHealth(i);
-				int total = ((health - damage) < 1) ? 1 : (health - damage);								
+				if (health < 39) {
+					return;
+				}
+				int total = ((health - damage) < 1) ? 1 : (health - damage);
+				if (total < 39){
+					SetEntityHealth(i, 39);
+					return;
+				}
 				SetEntityHealth(i, total);
 			}
 		}
