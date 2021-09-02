@@ -440,7 +440,7 @@ void SetThePrez(int client)
 		thePrez = client;
 		SetClientColors(thePrez, GetClientHealth(thePrez));
 		SDKHook(client, SDKHook_WeaponCanUse, OnWeaponCanUse);
-		//StripWeapons(thePrez);
+		StripWeapons(thePrez);
 		//if (!GetConVarBool(prezCanHeal)) { RemoveItemFromSlot(thePrez, WEP_SLOT_HEALTH); }
 		//GiveHandgun(client, GetConVarBool(prezAllowMagnum)); 
 		//SetEntDataFloat(thePrez, movementOffset, GetConVarFloat(prezSpeedRatio), true);
@@ -751,7 +751,8 @@ public Action OnWeaponCanUse(int client, int weapon)
 
 void StripWeapons(int client)
 {
-	RemoveItemFromSlot(client, WEP_SLOT_PRIMARY);
+	//RemoveItemFromSlot(client, WEP_SLOT_PRIMARY);´
+	DropSlot_l4d2(client, 0, false);
 	//RemoveItemFromSlot(client, WEP_SLOT_MELEE);	
 	//if (!GetConVarBool(prezCanHeal))  { RemoveItemFromSlot(client, WEP_SLOT_HEALTH); }
 }
@@ -1113,7 +1114,7 @@ void UnlockDoor(int door)
 	AcceptEntityInput(door, "Unlock");	
 }
 
-public void DropSlot_l4d2(int client,int slot, bool drop, char[] weapon)
+public void DropSlot_l4d2(int client,int slot, bool drop)
 {
 	if (GetPlayerWeaponSlot(client, slot) > 0)
 	{
