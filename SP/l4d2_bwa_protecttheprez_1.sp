@@ -52,6 +52,8 @@ public Plugin myinfo =
 	url         = ""
 };
 
+bool isRealism = false;
+
 int thePrez = 0;
 
 //int dfltGlow = 0;
@@ -160,6 +162,12 @@ public void OnMapStart()
 		isAllow = true;
 	} else {
 		isAllow = false;
+	}
+
+	//le enfant espaguett code
+
+	if(StrEqual(g_cGameMode, "realism", false)) {
+		isRealism = true;
 	}
 }
 
@@ -438,7 +446,9 @@ void SetThePrez(int client)
 		ResetAll();
 		prevPrez[client] = true;
 		thePrez = client;
-		SetClientColors(thePrez, GetClientHealth(thePrez));
+		if (!isRealism) {
+			SetClientColors(thePrez, GetClientHealth(thePrez));
+		}
 		SDKHook(client, SDKHook_WeaponCanUse, OnWeaponCanUse);
 		StripWeapons(thePrez);
 		//if (!GetConVarBool(prezCanHeal)) { RemoveItemFromSlot(thePrez, WEP_SLOT_HEALTH); }
@@ -453,7 +463,7 @@ void SetThePrez(int client)
 public void Event_PlayerBoomed(Event event, char[] event_name, bool dontBroadcast)
 {
 	if (thePrez == 0) { return; }
-	
+	if (isRealism){ return; }
 	int client = GetClientOfUserId(GetEventInt(event, "userid"));
 	if (client == thePrez)
 	{
@@ -465,6 +475,7 @@ public void Event_PlayerBoomed(Event event, char[] event_name, bool dontBroadcas
 public void Event_PlayerNoLongerBoomed(Event event, char[] event_name, bool dontBroadcast)
 {
 	if ((thePrez == 0) || (!prezBoomed)) { return; }
+	if (isRealism) { return; }
 	
 	int client = GetClientOfUserId(GetEventInt(event, "userid"));
 	if (client == thePrez)
@@ -855,6 +866,7 @@ public Action Player_Hurt(Event event, char[] event_name, bool dontBroadcast) {
 	// Don't forward or modify damage for incapped players
 	if (IsIncapped(userid) || IsHangingFromLedge(userid)) 
 	{ 
+		if (isRealism) { return; }
 		if (thePrez == userid) { SetClientColors(thePrez, GetClientHealth(thePrez)); }
 		return; 
 	}
@@ -863,6 +875,7 @@ public Action Player_Hurt(Event event, char[] event_name, bool dontBroadcast) {
 	// If damage is friendly fire, leave it alone
 	if (IsValidSurvivor(attacker, true)) 
 	{ 
+		if (isRealism) { return; }
 		if (thePrez == userid) { SetClientColors(thePrez, GetClientHealth(thePrez)); }
 		return; 
 	}
@@ -880,6 +893,7 @@ public Action Player_Hurt(Event event, char[] event_name, bool dontBroadcast) {
 		int prezdmg = RoundToCeil(float(dmg) / GetConVarFloat(prezHealthRatio));		
 		int preztotal = ((totalhealth - prezdmg) < 1) ? 1 : (totalhealth - prezdmg);
 		SetEntityHealth(userid, preztotal);
+		if (isRealism) { return; }
 		SetClientColors(thePrez, preztotal);	
 	}
 	else
@@ -1184,7 +1198,7 @@ public void DropSlot_l4d2(int client,int slot, bool drop)
 		TeleportEntity(index,cllocation, NULL_VECTOR, NULL_VECTOR);
 		DispatchSpawn(index);
 		ActivateEntity(index);
-		//RemoveItemFromSlot(client, WEP_SLOT_PRIMARY);
+		RemoveItemFromSlot(client, WEP_SLOT_PRIMARY);
 		if (slot == 0)
 		{
 			SetEntProp(index, Prop_Send, "m_iExtraPrimaryAmmo", ammo);
