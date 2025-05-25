@@ -17,14 +17,13 @@ public Plugin myinfo =
 
 public void OnPluginStart()
 {
-    HookEvent("player_spawn", HookOnPlayerSpawn_Post);
-    PrintToServer("\x04Caught item drop plugin is running");
+    HookEvent("round_start", HookOnPlayerSpawn_Post);
+    PrintToServer("\x04[\x03DB\x04] - \x01Drop bind plugin is running");
 }
 
 public void HookOnPlayerSpawn_Post(Event event, const char[] name, bool dontBroadcast)
 {
-    int client = GetClientOfUserId(event.GetInt("userid"));
-    PrintToChat(client, "\x04You can drop your current equiped item when you press the \x03[WALK] \x04and \x03[RELOAD] \x04buttons");
+    CreateTimer(5.0, Timer_ShowMessage);
 }
 
 public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3], float angles[3], int &weapon)
@@ -61,4 +60,10 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 stock bool IsValidClient(int client)
 {
     return (client > 0 && client <= MaxClients && IsClientInGame(client) && GetClientTeam(client) == 2);
+}
+
+stock Action Timer_ShowMessage(Handle timer)
+{
+    PrintToChatAll("\x04[\x03DB\x04] - \x03You can drop your current equiped item when you press the \x04[WALK] \x03and \x04[RELOAD] \x03buttons");
+    return Plugin_Stop;
 }
