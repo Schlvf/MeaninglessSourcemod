@@ -5,6 +5,7 @@
 #include <sdkhooks>
 
 ConVar g_FFReversalMultiplier = null;
+bool   g_Invulnerable[MAXPLAYERS];
 
 public Plugin myinfo =
 {
@@ -18,10 +19,22 @@ public Plugin myinfo =
 public void OnPluginStart()
 {
     g_FFReversalMultiplier = CreateConVar("g_FFReversalMultiplier", "0.8", "Default FF reversal damage", FCVAR_NOTIFY);
-    HookConVarChange(g_FFReversalMultiplier, HookOnDamageMultiplierChanged_Post);
-    HookEvent("player_spawn", HookOnPlayerSpawn_Post);
 
-    PrintToServer("\x04Friendly fire reversal plugin is running");
+    HookConVarChange(g_FFReversalMultiplier, HookOnDamageMultiplierChanged_Post);
+    HookEvent("round_start", HookOnPlayerSpawn_Post);
+
+    HookEvent("tongue_release", HookOnReviveOrRelease_Pre, EventHookMode_Pre);
+    HookEvent("charger_pummel_end", HookOnReviveOrRelease_Pre, EventHookMode_Pre);
+    HookEvent("jockey_ride_end", HookOnReviveOrRelease_Pre, EventHookMode_Pre);
+    HookEvent("pounce_stopped", HookOnReviveOrRelease_Pre, EventHookMode_Pre);
+    HookEvent("revive_success", HookOnReviveOrRelease_Pre, EventHookMode_Pre);
+
+    HookEvent("tongue_grab", HookOnGrab_Post, EventHookMode_Post);
+    HookEvent("charger_pummel_start", HookOnGrab_Post, EventHookMode_Post);
+    HookEvent("jockey_ride", HookOnGrab_Post, EventHookMode_Post);
+    HookEvent("lunge_pounce", HookOnGrab_Post, EventHookMode_Post);
+
+    PrintToServer("\x04[\x03FF\x04] - \x01Friendly fire reversal plugin is running");
 }
 
 public void OnClientPutInServer(int client)
@@ -31,14 +44,12 @@ public void OnClientPutInServer(int client)
 
 public void HookOnPlayerSpawn_Post(Event event, const char[] name, bool dontBroadcast)
 {
-    int client = GetClientOfUserId(event.GetInt("userid"));
-    PrintToChat(client, "\x04Friendly fire reversal plugin is running");
-    PrintToChat(client, "\x04The current reversal multiplier is \x03%.2f", g_FFReversalMultiplier.FloatValue);
+    CreateTimer(5.0, Timer_ShowMessage);
 }
 
 public void HookOnDamageMultiplierChanged_Post(ConVar convar, const char[] oldValue, const char[] newValue)
 {
-    PrintToServer("\x04g_FFReversalMultiplier reversal multiplier changed from \x03%s \x04to \x03%s", oldValue, newValue);
+    PrintToServer("\x04[\x03FF\x04] - \x04g_FFReversalMultiplier \x03reversal multiplier changed from \x04%s \x03to \x04%s", oldValue, newValue);
 }
 
 public Action HookOnTakeDamage_Pre(int victim, int &attacker, int &inflictor, float &damage, int &damagetype)
@@ -58,10 +69,55 @@ public Action HookOnTakeDamage_Pre(int victim, int &attacker, int &inflictor, fl
     int rDamage;
     rDamage = RoundToCeil(damage);
 
-    PrintToChatAll("\x03%N \x04damaged \x03%N \x04for \x03%d", attacker, victim, rDamage);
+    PrintToChatAll("\x04[\x03FF\x04] - \x04%N \x03damaged \x04%N \x03for \x04%d", attacker, victim, rDamage);
 
     SDKHooks_TakeDamage(attacker, inflictor, attacker, damage * g_FFReversalMultiplier.FloatValue, damagetype);
     return Plugin_Handled;
+}
+
+public void HookOnReviveOrRelease_Pre(Event event, const char[] name, bool dontBroadcast)
+{
+    int  client;
+    bool wasRes = false;
+
+    if (StrEqual(name, "revive_success"))
+    {
+        client = GetClientOfUserId(event.GetInt("subject"));
+        wasRes = true;
+    }
+    else {
+        client = GetClientOfUserId(event.GetInt("victim"));
+    }
+
+    if (!IsValidClient(client))
+    {
+        return;
+    }
+
+    if (wasRes)
+    {
+        g_Invulnerable[client] = true;
+    }
+
+    CreateTimer(2.0, Timer_Callback, client);
+}
+
+public void HookOnGrab_Post(Event event, const char[] name, bool dontBroadcast)
+{
+    int client = GetClientOfUserId(event.GetInt("victim"));
+
+    if (!IsValidClient(client))
+    {
+        return;
+    }
+
+    g_Invulnerable[client] = true;
+}
+
+stock Action Timer_Callback(Handle timer, int client)
+{
+    g_Invulnerable[client] = false;
+    return Plugin_Stop;
 }
 
 stock bool WasValidFriendlyFireActors(int victim, int attacker)
@@ -84,9 +140,9 @@ stock bool WasValidFriendlyFireActors(int victim, int attacker)
         return false;
     }
 
-    if (IsIncaped(victim))
+    if (IsIncaped(victim) || g_Invulnerable[victim])
     {
-        // If the victim is incapacitated
+        // If the victim is incapacitated or invulnerable
         return false;
     }
     return true;
@@ -104,5 +160,11 @@ stock bool IsPlayerAndSurvivor(int client)
 
 stock bool IsIncaped(int client)
 {
-    return (GetEntProp(client, Prop_Send, "m_isIncapacitated", 1) > 0);
+    return (GetEntProp(client, Prop_Send, "m_isIncapacitated") > 0);    // Downed
+}
+
+stock Action Timer_ShowMessage(Handle timer)
+{
+    PrintToChatAll("\x04[\x03FF\x04] - \x03Friendly fire reversal plugin is running. The current reversal multiplier is \x04%.2f", g_FFReversalMultiplier.FloatValue);
+    return Plugin_Stop;
 }
